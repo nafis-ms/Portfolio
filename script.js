@@ -355,3 +355,28 @@ fitTitle();
 
   load();
 })();
+/* ---------- Contact: copy email address ---------- */
+(function () {
+  const btn = $("copyMail"),
+    link = $("mailLink");
+  if (!btn || !link) return;
+  const addr = link.textContent.trim();
+  btn.addEventListener("click", async () => {
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(addr);
+      ok = true;
+    } catch {
+      const t = document.createElement("textarea");
+      t.value = addr;
+      t.style.position = "fixed";
+      t.style.opacity = "0";
+      document.body.append(t);
+      t.select();
+      try { ok = document.execCommand("copy"); } catch {}
+      t.remove();
+    }
+    btn.textContent = ok ? "Copied" : "Copy failed";
+    setTimeout(() => (btn.textContent = "Copy"), 1800);
+  });
+})();
