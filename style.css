@@ -695,3 +695,29 @@ html {
   pointer-events: none;
   user-select: none;
 }
+/* Contact: fallback address + copy */
+.contact-alt {
+  color: rgba(215, 226, 234, 0.7);
+  font-weight: 300;
+  font-size: 0.95rem;
+}
+.contact-alt a {
+  color: #d7e2ea;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  word-break: break-all;
+}
+.copy-btn {
+  font: inherit;
+  font-size: 0.8rem;
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.75rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  color: #d7e2ea;
+  background: transparent;
+  border: 1px solid rgba(215, 226, 234, 0.4);
+}
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
