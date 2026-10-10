@@ -259,6 +259,18 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   .item .actions { width: 100%; justify-content: flex-start; }
 }
 
+/* ---------- feedback moderation ---------- */
+.fba-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; }
+.fba-tabs { gap: 0.4rem; }
+.fba-tabs .btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.fba-tabs .count { font-size: 0.8rem; margin-left: 0.15rem; }
+.stack > .msg { margin-top: 0; min-height: 0; }
+.item.fb-item { align-items: flex-start; flex-wrap: wrap; }
+.item.fb-item .meta { flex: 1 1 260px; }
+.fb-msg { margin-top: 0.35rem; font-size: 0.92rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fb-msg.too-long { border-left: 3px solid var(--err); padding-left: 0.6rem; }
+.fb-note { font-size: 0.78rem; color: var(--err); margin-top: 0.25rem; display: block; }
+
 /* ---------- collapsible sections ---------- */
 .fold { margin-top: 1.25rem; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
 .stack .fold { margin-top: 0; }
