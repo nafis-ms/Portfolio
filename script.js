@@ -10,9 +10,7 @@ const forceMotion = (() => {
 const reduce =
   !forceMotion && matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Phones / tablets / narrow screens: use light images instead of the .webm videos
-const LITE = matchMedia(
-  "(hover: none), (pointer: coarse), (max-width: 700px)",
-).matches;
+const LITE = matchMedia("(hover: none), (pointer: coarse)").matches;
 
 /* ---------- Navbar ---------- */
 (function () {
@@ -366,11 +364,13 @@ fitTitle();
   }).observe(section);
   new ResizeObserver(measure).observe(orbit);
 
+  window.OrbitState = () => ({ items: items.length, visible, paused, angle });
   (function frame(t) {
     const dt = Math.min(0.05, (t - last) / 1000);
     last = t;
-    if (items.length && visible && !paused && !reduce) {
-      angle += SPEED * dt;
+    if (items.length && visible && !paused) {
+      // reduced-motion devices still get a gentler turn (full speed otherwise)
+      angle += SPEED * (reduce ? 0.7 : 1) * dt;
       place();
     }
     requestAnimationFrame(frame);
@@ -393,21 +393,53 @@ fitTitle();
     section = $("projects");
   if (!char || !video || !hit || !section) return;
 
-  /* Mobile / touch: no video. Show src/work.png, and src/hi.png while hovered / tapped. */
+  /* Mobile / touch: no video. Show work.png, and hi.png while hovered / tapped.
+   * The images are looked for in src/, then next to index.html, so a wrong folder cannot make
+   * the character vanish. If none is found, the poster image (then the text) is shown instead. */
   if (LITE) {
-    const WORK = "src/work.png",
-      HI = "src/hi.png";
+    const DIRS = ["src/", "", "images/", "assets/"];
+    const EXTS = ["webp", "png"]; // work.webp / hi.webp are the light versions
     const img = document.createElement("img");
     img.className = "char-img";
-    img.src = WORK;
     img.alt = "Character working on a laptop";
     img.draggable = false;
     video.replaceWith(img);
-    new Image().src = HI; // preload so the swap is instant
-    let t = 0;
+
+    let base = null, // folder + ext that worked, e.g. "src/" + "webp"
+      WORK = "",
+      HI = "",
+      t = 0;
+    const poster = video.getAttribute("poster");
+    const combos = [];
+    DIRS.forEach((d) => EXTS.forEach((x) => combos.push([d, x])));
+    (function find(i) {
+      if (i >= combos.length) {
+        if (poster) {
+          img.src = poster; // last resort: the still frame
+          img.onerror = () => {
+            char.hidden = true;
+            const fb = $("orbitFallback");
+            if (fb) fb.hidden = false;
+          };
+        }
+        return;
+      }
+      const [d, x] = combos[i];
+      const probe = new Image();
+      probe.onload = () => {
+        base = d;
+        WORK = d + "work." + x;
+        HI = d + "hi." + x;
+        img.src = WORK;
+        new Image().src = HI; // preload so the swap is instant
+      };
+      probe.onerror = () => find(i + 1);
+      probe.src = d + "work." + x;
+    })(0);
+
     const sayHi = () => {
       clearTimeout(t);
-      img.src = HI;
+      if (base !== null) img.src = HI;
       char.classList.add("is-hi");
     };
     const back = (e) => {
@@ -415,7 +447,7 @@ fitTitle();
       // finger: keep the greeting visible a moment after the tap
       t = setTimeout(
         () => {
-          img.src = WORK;
+          if (base !== null) img.src = WORK;
           char.classList.remove("is-hi");
         },
         e.pointerType === "mouse" ? 250 : 1400,
@@ -730,3 +762,34 @@ fitTitle();
     setTimeout(() => (btn.textContent = "Copy"), 1800);
   });
 })();
+/* ---------- Debug panel: open the site with ?debug=1 to see why an effect is off ---------- */
+if (/[?&]debug=1/.test(location.search)) {
+  const box = document.createElement("pre");
+  box.style.cssText =
+    "position:fixed;left:8px;bottom:8px;z-index:2147483600;margin:0;padding:8px 10px;max-width:92vw;" +
+    "font:12px/1.35 monospace;color:#0f0;background:rgba(0,0,0,.85);border-radius:8px;white-space:pre-wrap";
+  document.body.append(box);
+  let prev = null;
+  setInterval(() => {
+    const w = window.SkillsScene && SkillsScene.world;
+    const b = w && w.bodies[0];
+    const pos = b ? b.x.toFixed(3) + "," + b.y.toFixed(3) : "-";
+    const moved = prev !== null && prev !== pos;
+    prev = pos;
+    const sec = $("skills");
+    box.textContent = [
+      "reduced motion (applied): " + reduce,
+      "OS reduce-motion setting: " + matchMedia("(prefers-reduced-motion: reduce)").matches,
+      "touch mode (images, no video): " + LITE,
+      "skills section: " + (sec ? (sec.hidden ? "HIDDEN (no skills data)" : "shown") : "missing"),
+      "skill spheres: " + (w ? w.bodies.length : 0) + (sec && sec.classList.contains("no-webgl") ? "  WEBGL FAILED" : ""),
+      "sphere moving: " + moved,
+      "project cards: " + document.querySelectorAll(".orbit-card").length +
+        (window.OrbitState ? "  orbit " + JSON.stringify(OrbitState(), (k, v) => (typeof v === "number" ? +v.toFixed(2) : v)) : ""),
+      "project char: " + (($("orbitChar") || {}).hidden ? "HIDDEN" : "shown") +
+        ($("orbitChar") && $("orbitChar").querySelector(".char-img")
+          ? " img=" + $("orbitChar").querySelector(".char-img").getAttribute("src")
+          : " video"),
+    ].join("\n");
+  }, 1000);
+}
