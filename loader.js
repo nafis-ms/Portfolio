@@ -22,7 +22,17 @@
     try { if (sessionStorage.getItem(SEEN_KEY)) return; } catch (e) { /* storage blocked: just show it */ }
   }
 
-  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Visit the site once with ?motion=on to play the full animations even when the device
+  // is set to "reduce motion" (battery saver, Windows "show animations" off, iOS Reduce Motion).
+  // ?motion=auto goes back to following the device. Stored in this browser only.
+  try {
+    var qm = new URLSearchParams(location.search).get("motion");
+    if (qm === "on") localStorage.setItem("portfolio-motion", "on");
+    else if (qm === "auto") localStorage.removeItem("portfolio-motion");
+  } catch (e) { /* storage blocked */ }
+  var forceMotion = false;
+  try { forceMotion = localStorage.getItem("portfolio-motion") === "on"; } catch (e) { /* blocked */ }
+  var reduce = !forceMotion && window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var START = 0.4, STAGGER = 0.12;   // seconds: when the first hop starts, and the gap between tiles
   var lastTile = START + (CONFIG.tiles.length - 1) * STAGGER;
   // stay at least until the last tile has finished its final bounce
