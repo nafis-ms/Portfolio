@@ -697,15 +697,8 @@ fitTitle();
       threshold: [0, 0.01], // the 0.01 step makes sure we are told when only an edge still touches the screen
     }).observe(hero);
 
-  // Reduced motion: no typing, just swap the word now and then
-  if (reduce) {
-    setInterval(() => {
-      if (document.hidden || !heroVisible) return;
-      wi = (wi + 1) % words.length;
-      word.textContent = words[wi];
-    }, 4000);
-    return;
-  }
+  // The typing runs on every device: it is a small text effect, so it also plays when the
+  // device asks for reduced motion (only the blinking cursor is switched off, in style.css).
 
   function step() {
     if (document.hidden || !heroVisible) return setTimeout(step, 400); // do nothing while nobody sees it
