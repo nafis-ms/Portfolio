@@ -24,14 +24,14 @@
     "name": "HTML",
     "logo": "",
     "category": "",
-    "size": "medium",
+    "size": "large",
     "visible": true
   },
   {
     "name": "CSS",
     "logo": "",
     "category": "",
-    "size": "medium",
+    "size": "large",
     "visible": true
   },
   {
@@ -45,7 +45,7 @@
     "name": "MySQL",
     "logo": "",
     "category": "",
-    "size": "medium",
+    "size": "small",
     "visible": true
   },
   {
