@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#0c0c0c" id="metaTheme">
+    <script>
+      /* Apply the saved theme before the page paints (no flash). Default: dark. */
+      (function () {
+        var t = "dark";
+        try { t = localStorage.getItem("portfolio-theme") === "light" ? "light" : "dark"; } catch (e) {}
+        document.documentElement.setAttribute("data-theme", t);
+        var m = document.getElementById("metaTheme");
+        if (m) m.setAttribute("content", t === "light" ? "#f5f6fa" : "#0c0c0c");
+      })();
+    </script>
+    <title>Musbitul - Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div id="root"><div class="main">
+
+        <!-- HERO -->
+        <section class="hero snap-section" id="home">
+          <header class="gnav" id="gnav">
+            <a class="gnav-logo" href="#home">
+              <span class="bars"><i></i><i></i><i></i></span><span
+                class="name">Musbitul Haque</span>
+            </a>
+
+            <ul class="gnav-links" id="navLinks">
+              <li><a href="#home">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#projects">Projects</a></li>
+              <li hidden><a href="#skills">Skills</a></li>
+              <li hidden><a href="#github">GitHub</a></li>
+              <li><a href="#contact">Contact</a></li>
+              <li class="cv-li"><a class="cv-btn" href="#" download="CV.pdf"
+                  hidden>Download CV</a></li>
+            </ul>
+            <div class="gnav-right">
+              <a class="gnav-cta gnav-cv cv-btn" href="#" download="CV.pdf"
+                hidden>Download CV</a>
+              <a class="gnav-cta" href="#contact">Contact</a>
+              <button class="icon-btn theme-toggle" id="themeToggle"
+                type="button" aria-label="Switch to light mode"
+                title="Switch to light mode" aria-pressed="false">
+                <svg class="ico-moon" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true"><path
+                    d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+                <svg class="ico-sun" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" aria-hidden="true"><circle cx="12"
+                    cy="12" r="4" /><path
+                    d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+              </button>
+              <button class="icon-btn gnav-burger" id="navBurger"
+                aria-label="Menu" aria-expanded="false"
+                aria-controls="navLinks">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round"><path
+                    d="M4 7h16M4 12h16M4 17h16" /></svg>
+              </button>
+            </div>
+          </header>
+          <div class="hero-head-wrap">
+            <h1 class="hero-heading hero-title fade" data-y="40"
+              data-d="0.15">Hi, I&apos;m<br>Musbitul</h1>
+          </div>
+          <div class="hero-bottom">
+            <!-- Typewriter roles: edit the words in data-words (separate with | ).
+                 Without JavaScript, the first word is shown as plain text. -->
+            <p class="hero-text hero-type fade" data-y="20" data-d="0.35">
+              <span class="type-line" id="typeLine"
+                data-words="Software Engineer|Full Stack Developer|Algorithm Enthusiast|Problem Solver|3D Graphics Designer">
+                <span class="type-live" aria-hidden="true"><span
+                    class="hero-lead">Passionate   </span> <span class="type-word"
+                    id="typeWord">Software Engineer</span><span
+                    class="type-cursor" id="typeCursor"></span></span>
+              </span>
+            </p>
+          </div>
+          <div class="portrait">
+            <div class="character fade" data-y="30" data-d="0.6">
+              <div class="stage" id="stage">
+                <img class="pose on" data-pose="front" src="src/front.webp"
+                  alt="Musbitul">
+                <img class="pose" data-pose="left" src="src/left.webp" alt>
+                <img class="pose" data-pose="right" src="src/right.webp" alt>
+                <video id="charVideo" class="pose-video" muted playsinline
+                  preload="auto" disablepictureinpicture>
+                  <source src="src/character.webm" type="video/webm">
+                </video>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ABOUT -->
+        <section class="about snap-section" id="about">
+          <img class="deco moon fade" data-x="-80" data-y="0" data-d="0.1"
+            data-dur="0.9" alt
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/moon_icon.11395d36.png">
+          <img class="deco p59 fade" data-x="-80" data-y="0" data-d="0.25"
+            data-dur="0.9" alt
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/p59_1.4659672e.png">
+          <img class="deco lego fade" data-x="80" data-y="0" data-d="0.15"
+            data-dur="0.9" alt
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/lego_icon-1.703bb594.png">
+          <img class="deco group fade" data-x="80" data-y="0" data-d="0.3"
+            data-dur="0.9" alt
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/Group_134-1.2e04f3ce.png">
+          <div class="about-inner">
+            <div class="about-block">
+              <h2 class="hero-heading section-title fade" data-y="40"
+                data-d="0">About me</h2>
+              <p class="animated-text" id="animText">I’m a Software Engineering
+                enthusiast who loves turning ideas into meaningful digital
+                experiences. My work spans web development, programming,
+                computer graphics, and AI, with a strong focus on building
+                things that are both functional and visually engaging. I enjoy
+                solving problems, learning new technologies, and challenging
+                myself through hands-on projects. I’m constantly experimenting,
+                improving, and pushing my skills further with one goal in mind:
+                to become a versatile software engineer capable of building
+                impactful products from the ground up.</p>
+              <a class="contact-btn cv-btn" href="#" download="CV.pdf"
+                hidden>Download CV</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- PROJECTS -->
+        <section class="projects snap-section" id="projects"
+          aria-label="Projects">
+          <div class="orbit" id="orbit">
+            <h1 class="hero-heading orbit-title">Projects</h1>
+            <div class="orbit-center">
+              <div class="char" id="orbitChar">
+                <video id="orbitCenter" src="src/working-loop.webm"
+                  poster="src/working-poster.webp" muted playsinline
+                  preload="auto" role="img"
+                  aria-label="Animated character working on a laptop"></video>
+                <span class="char-hi" id="charHi" aria-hidden="true">Hi!</span>
+                <!-- hover / tap area over the character: it says hi -->
+                <span class="char-hit" id="charHit" aria-hidden="true"></span>
+              </div>
+              <h2 id="orbitFallback" class="hero-heading section-title"
+                hidden>Project is fun</h2>
+            </div>
+            <!-- project cards are inserted here by script.js (from projects.json) -->
+            <div class="orbit-items" id="orbitItems"></div>
+          </div>
+        </section>
+
+        <!-- SKILLS (3D spheres are drawn by skills.js from the admin-managed skills) -->
+        <section class="skills snap-section" id="skills" aria-label="Skills"
+          hidden>
+          <div class="skills-stage" id="skillsStage">
+            <h2 class="hero-heading orbit-title">Skills</h2>
+            <canvas class="skills-canvas" id="skillsCanvas" role="img"
+              aria-label="Skills"></canvas>
+            <!-- shown instead of the canvas if WebGL is unavailable -->
+            <ul class="skills-fallback" id="skillsFallback"></ul>
+          </div>
+          <ul class="sr-only" id="skillsList"></ul>
+        </section>
+
+        <!-- GITHUB (filled in by github.js). Set data-user to your GitHub username;
+             while it is still the placeholder, the section and its nav link stay hidden. -->
+        <section class="github snap-section" id="github" aria-label="GitHub"
+          data-user="nafis-ms" hidden>
+          <div class="gh-wrap">
+            <h2 class="hero-heading section-title gh-title fade" data-y="40"
+              data-d="0">GitHub</h2>
+            <article class="gh-card fade" data-y="30" data-d="0.15"
+              id="ghCard" aria-busy="true">
+              <header class="gh-head">
+                <span class="gh-brand">
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path
+                      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" /></svg>
+                  <b>GitHub Stack</b>
+                </span>
+                <a class="gh-view" id="ghLink" href="https://github.com/"
+                  target="_blank" rel="noopener noreferrer">View profile</a>
+              </header>
+
+              <div class="gh-top">
+                <div class="gh-profile">
+                  <img class="gh-avatar" id="ghAvatar" width="64" height="64"
+                    alt="" hidden>
+                  <div class="gh-id">
+                    <h3 id="ghName">Loading...</h3>
+                    <p class="gh-handle" id="ghHandle"></p>
+                    <p class="gh-bio" id="ghBio"></p>
+                  </div>
+                </div>
+                <dl class="gh-stats">
+                  <div><dt>Repos</dt><dd id="ghRepos">-</dd></div>
+                  <div><dt>Stars</dt><dd id="ghStars">-</dd></div>
+                  <div><dt>Followers</dt><dd id="ghFollowers">-</dd></div>
+                  <div><dt>Following</dt><dd id="ghFollowing">-</dd></div>
+                </dl>
+              </div>
+
+              <div class="gh-langs" id="ghLangs" hidden>
+                <h3 class="gh-sub">Top languages</h3>
+                <div class="gh-langbar" id="ghLangBar" role="img"></div>
+                <ul class="gh-langlist" id="ghLangList"></ul>
+              </div>
+
+              <div class="gh-activity" id="ghActivity" hidden>
+                <div class="gh-activity-head">
+                  <h3 class="gh-sub">Contributions activity</h3>
+                  <span class="gh-total" id="ghTotal"></span>
+                </div>
+                <div class="gh-scroll" id="ghScroll">
+                  <div class="gh-cal" id="ghCal" role="img">
+                    <span></span>
+                    <div class="gh-months" id="ghMonths" aria-hidden="true"></div>
+                    <div class="gh-days" aria-hidden="true">
+                      <span>Mon</span><span>Wed</span><span>Fri</span>
+                    </div>
+                    <div class="gh-grid" id="ghGrid" aria-hidden="true"></div>
+                  </div>
+                </div>
+                <div class="gh-legend" aria-hidden="true">
+                  <span>Less</span><i data-l="0"></i><i data-l="1"></i><i
+                    data-l="2"></i><i data-l="3"></i><i data-l="4"></i><span>More</span>
+                </div>
+              </div>
+
+              <p class="gh-msg" id="ghMsg" role="status"></p>
+            </article>
+          </div>
+        </section>
+
+        <!-- FEEDBACK (handled by feedback.js). LEFT: visitors send feedback. RIGHT: the feedback you
+             keep in the admin panel slides by itself (published as feedback.json).
+             Visitors' messages reach you by email: set data-endpoint to a Formspree / Web3Forms URL,
+             or leave it empty and the form opens the visitor's mail app, addressed to data-email. -->
+        <section class="feedback snap-section" id="feedback" aria-label="Feedback">
+          <div class="fb-wrap">
+            <h2 class="hero-heading section-title fb-title fade" data-y="40"
+              data-d="0">Feedback</h2>
+            <div class="fb-layout">
+              <form class="fb-card fade" id="fbForm" data-y="30" data-d="0.15"
+                novalidate data-endpoint="" data-access-key=""
+                data-email="musbitul.haque.nafis@gmail.com">
+                <h3 class="fb-card-title">Leave feedback</h3>
+                <fieldset class="fb-rating">
+                  <legend>How was your visit?</legend>
+                  <div class="fb-stars">
+                    <input type="radio" name="rating" id="fbR5" value="5"><label for="fbR5" title="5 stars"><span class="sr-only">5 stars</span>&#9733;</label>
+                    <input type="radio" name="rating" id="fbR4" value="4"><label for="fbR4" title="4 stars"><span class="sr-only">4 stars</span>&#9733;</label>
+                    <input type="radio" name="rating" id="fbR3" value="3"><label for="fbR3" title="3 stars"><span class="sr-only">3 stars</span>&#9733;</label>
+                    <input type="radio" name="rating" id="fbR2" value="2"><label for="fbR2" title="2 stars"><span class="sr-only">2 stars</span>&#9733;</label>
+                    <input type="radio" name="rating" id="fbR1" value="1"><label for="fbR1" title="1 star"><span class="sr-only">1 star</span>&#9733;</label>
+                  </div>
+                </fieldset>
+                <div class="fb-row">
+                  <div class="fb-field">
+                    <label for="fbName">Name <em>(optional)</em></label>
+                    <input id="fbName" name="name" type="text" maxlength="60"
+                      autocomplete="name">
+                  </div>
+                  <div class="fb-field">
+                    <label for="fbEmail">Email <em>(optional)</em></label>
+                    <input id="fbEmail" name="email" type="email" maxlength="120"
+                      autocomplete="email">
+                  </div>
+                </div>
+                <div class="fb-field">
+                  <label for="fbMsg">Your feedback</label>
+                  <textarea id="fbMsg" name="message" rows="4" maxlength="1000"
+                    required></textarea>
+                  <span class="fb-count" id="fbCount" aria-hidden="true">0 / 1000</span>
+                </div>
+                <input class="fb-hp" name="website" type="text" tabindex="-1"
+                  autocomplete="off" aria-hidden="true">
+                <div class="fb-actions">
+                  <button class="contact-btn fb-send" id="fbSend" type="submit">Send
+                    feedback</button>
+                  <p class="fb-status" id="fbStatus" role="status"></p>
+                </div>
+              </form>
+
+              <aside class="fb-card fb-board fade" data-y="30" data-d="0.3"
+                aria-label="What people say">
+                <h3 class="fb-card-title">What people say</h3>
+                <p class="fb-empty" id="fbEmpty">Nothing here yet. Yours could be the
+                  first.</p>
+                <div class="fb-show" id="fbShow" hidden>
+                  <div class="fb-slides" id="fbSlides" aria-live="off"></div>
+                  <div class="fb-nav" id="fbNav">
+                    <button type="button" class="fb-arrow" id="fbPrev"
+                      aria-label="Previous feedback">&lsaquo;</button>
+                    <div class="fb-dots" id="fbDots"></div>
+                    <button type="button" class="fb-arrow" id="fbNext"
+                      aria-label="Next feedback">&rsaquo;</button>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <!-- CONTACT -->
+        <section class="contact snap-section" id="contact">
+          <div class="contact-inner">
+            <h2 class="hero-heading section-title fade" data-y="40"
+              data-d="0">Let&apos;s talk</h2>
+            <p class="contact-text fade" data-y="20" data-d="0.15">Have a
+              project
+              or an idea? Send me a message.</p>
+            <a
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=musbitul.haque.nafis%40gmail.com&su=Hello%20Musbitul"
+              target="_blank" rel="noopener noreferrer"
+              class="contact-btn fade" data-y="20" data-d="0.3">Email Me</a>
+          </div>
+        </section>
+
+      </div></div>
+    <script src="theme.js"></script>
+    <script src="loader.js"></script>
+    <script src="store.js"></script>
+    <script src="script.js"></script>
+    <script src="skills-physics.js"></script>
+    <script src="skills-render.js"></script>
+    <script src="skills.js"></script>
+    <script src="github.js"></script>
+    <script src="feedback.js"></script>
+  </body>
+</html>
