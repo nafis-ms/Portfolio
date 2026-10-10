@@ -1,14 +1,4 @@
-/* Skills section: loads the skills saved in the admin panel and shows them as a
- * floating cluster of glossy 3D spheres.
- *
- *   data:         store.js (PF.skills) or a published skills.json
- *   physics:      skills-physics.js
- *   rendering:    skills-render.js
- *   this file:    data loading, cursor/touch interaction, the animation loop,
- *                 resizing, reduced motion and the no-WebGL fallback
- *
- * Skill shape: { id, name, logo, category, size: "small"|"medium"|"large", visible }
- * Add, edit, hide or delete skills in admin.html; nothing is hardcoded here. */
+
 (function () {
   "use strict";
 
@@ -27,7 +17,9 @@
   if (!section || !stage || !canvas || !window.SkillsPhysics || !window.SkillsRender) return;
 
   var navItem = (document.querySelector('.gnav-links a[href="#skills"]') || {}).parentElement || null;
-  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var forceMotion = false;
+  try { forceMotion = localStorage.getItem("portfolio-motion") === "on"; } catch (e) { /* blocked */ }
+  var reduce = !forceMotion && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var world = SkillsPhysics.createWorld();
   var renderer = null;
@@ -70,7 +62,10 @@
     // 2) otherwise a published skills.json next to index.html
     return fetch(SKILLS_URL, { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(apply, function () { apply([]); });             // missing/invalid file = no skills
+      .then(apply, function () {
+        console.warn("[portfolio] skills.json not found. Skills are saved only in the browser that used the admin panel; open admin > Publish > Apply Changes.");
+        apply([]);                                          // missing/invalid file = no skills
+      });
   }
 
   /* ---------- logo textures ---------- */
