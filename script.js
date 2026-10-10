@@ -1,6 +1,14 @@
 const $ = (id) => document.getElementById(id);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const forceMotion = (() => {
+  try {
+    return localStorage.getItem("portfolio-motion") === "on"; // set by visiting ?motion=on
+  } catch {
+    return false;
+  }
+})();
+const reduce =
+  !forceMotion && matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Phones / tablets / narrow screens: use light images instead of the .webm videos
 const LITE = matchMedia(
   "(hover: none), (pointer: coarse), (max-width: 700px)",
@@ -152,6 +160,10 @@ function track(clientX, clientY) {
   lastMove = performance.now();
 }
 addEventListener("pointermove", (e) => track(e.clientX, e.clientY), {
+  passive: true,
+});
+// Touch screens have no hover: a tap turns him toward the finger
+addEventListener("pointerdown", (e) => track(e.clientX, e.clientY), {
   passive: true,
 });
 document.documentElement.addEventListener("pointerleave", () => {
@@ -330,6 +342,9 @@ fitTitle();
       if (!r.ok) throw new Error(r.status);
       setProjects(await r.json());
     } catch {
+      console.warn(
+        "[portfolio] projects.json not found. Projects are saved only in the browser that used the admin panel; open admin > Publish > Apply Changes.",
+      );
       setProjects([]); // missing/invalid file = no projects
     }
   }
