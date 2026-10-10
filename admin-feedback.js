@@ -1,151 +1,100 @@
-/* Feedback admin: add, edit, delete, show/hide and reorder the feedback that slides
- * across the site. Runs entirely in the browser (data layer: store.js, PF.feedback),
- * like projects and skills. Sign-in is handled by admin.js. */
-(function () {
-  "use strict";
-  var MAX = 50;
-  var $ = function (s) { return document.querySelector(s); };
-  var editingId = null;
+/* Admin endpoint (needs the x-admin-key header).
+ *   GET  /api/admin-feedback          every entry (pending, accepted, rejected) with emails
+ *   POST /api/admin-feedback          { action, id, ... } where action is one of:
+ *        accept   pending/rejected -> accepted (shown in the slider)
+ *        reject   -> rejected (kept in the Rejected list)
+ *        pending  -> back to pending (also "unpublish")
+ *        delete   remove for good
+ *        update   edit name, role, rating, message
+ *        add      you write one yourself: it is accepted straight away
+ *        move     { id, dir: -1 | 1 } reorder inside the slider
+ * Every POST answers with the full, fresh list. */
+"use strict";
+const L = require("./_lib");
 
-  function say(el, text, kind) {
-    el.textContent = text || "";
-    el.className = "msg" + (kind ? " " + kind : "");
+const STATUS = { accept: "accepted", reject: "rejected", pending: "pending" };
+
+function tooLong(msg) {
+  return new L.HttpError(400, "This feedback is " + msg.length + " characters, but the slider shows up to " + L.SLIDER_MAX + ". Edit it shorter first (Edit button), then accept it.");
+}
+
+module.exports = L.wrap(async (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  if (req.method !== "GET" && req.method !== "POST") {
+    res.setHeader("Allow", "GET, POST");
+    return L.send(res, 405, { error: "Method not allowed." });
   }
-  function newId() { return Math.random().toString(16).slice(2, 10) + Date.now().toString(16); }
-  function stars(n) { n = Math.max(0, Math.min(5, Number(n) || 0)); return n ? "★".repeat(n) + "☆".repeat(5 - n) : "No rating"; }
+  await L.requireAdmin(req);
 
-  function persist(next, msgEl, okText) {
-    try { PF.feedback.save(next); }
-    catch (err) { say(msgEl, "Browser storage is full. Delete something first.", "error"); return false; }
-    render();
-    if (okText) say(msgEl, okText, "ok");
-    return true;
-  }
-
-  /* ---------- list ---------- */
-  function render() {
-    var items = PF.feedback.all(), list = $("#fbaList");
-    list.textContent = "";
-    $("#fbaCount").textContent = items.length ? "(" + items.length + ")" : "";
-    $("#fbaEmpty").hidden = items.length > 0;
-
-    items.forEach(function (f, i) {
-      var li = document.createElement("li");
-      li.className = "item" + (f.visible === false ? " is-hidden" : "");
-
-      var meta = document.createElement("div");
-      meta.className = "meta";
-      var name = document.createElement("div");
-      name.className = "name";
-      name.textContent = f.name + (f.role ? " · " + f.role : "");
-      var sub = document.createElement("span");
-      sub.className = "site";
-      sub.textContent = stars(f.rating) + " · " + (f.visible === false ? "Hidden" : "Visible") + " · " + f.message;
-      meta.append(name, sub);
-
-      var actions = document.createElement("div");
-      actions.className = "actions";
-      function btn(label, cls, fn, aria, disabled) {
-        var b = document.createElement("button");
-        b.type = "button";
-        b.className = "btn ghost" + (cls ? " " + cls : "");
-        b.textContent = label;
-        if (aria) b.setAttribute("aria-label", aria);
-        b.disabled = !!disabled;
-        b.addEventListener("click", fn);
-        return b;
-      }
-      actions.append(
-        btn("↑", "", function () { move(i, -1); }, "Move " + f.name + " earlier", i === 0),
-        btn("↓", "", function () { move(i, 1); }, "Move " + f.name + " later", i === items.length - 1),
-        btn(f.visible === false ? "Show" : "Hide", "", function () { toggle(f); }),
-        btn("Edit", "", function () { startEdit(f); }),
-        btn("Delete", "danger", function () { remove(f); })
-      );
-      li.append(meta, actions);
-      list.append(li);
-    });
+  if (req.method === "GET") {
+    return L.send(res, 200, { items: (await L.loadAll()).sort((a, b) => b.createdAt - a.createdAt) });
   }
 
-  function move(i, dir) {
-    var list = PF.feedback.all(), j = i + dir;
-    if (j < 0 || j >= list.length) return;
-    var t = list[i]; list[i] = list[j]; list[j] = t;
-    persist(list, $("#fbaMsg"));
-  }
-  function toggle(f) {
-    persist(PF.feedback.all().map(function (x) {
-      if (x.id !== f.id) return x;
-      var c = {}; for (var k in x) c[k] = x[k];
-      c.visible = x.visible === false;
-      return c;
-    }), $("#fbaMsg"), f.visible === false ? "Now in the slider (after Apply Changes)." : "Removed from the slider (after Apply Changes).");
-  }
-  function remove(f) {
-    if (!confirm('Delete the feedback from "' + f.name + '"?')) return;
-    if (persist(PF.feedback.all().filter(function (x) { return x.id !== f.id; }), $("#fbaMsg"), "Deleted.")) {
-      if (editingId === f.id) resetForm();
+  const b = await L.readBody(req);
+  const all = await L.loadAll();
+  const find = () => {
+    const it = all.find((x) => x.id === String(b.id || ""));
+    if (!it) throw new L.HttpError(404, "That feedback no longer exists. Refresh the list.");
+    return it;
+  };
+  const nextOrder = () => all.reduce((m, i) => (i.status === "accepted" ? Math.max(m, i.order || 0) : m), 0) + 1;
+  const changed = [];
+
+  switch (b.action) {
+    case "accept": {
+      const it = find();
+      if (it.message.length > L.SLIDER_MAX) throw tooLong(it.message);
+      if (it.status !== "accepted") { it.status = "accepted"; it.order = nextOrder(); changed.push(it); }
+      break;
     }
-  }
-
-  /* ---------- add / edit ---------- */
-  var form = $("#fbaForm");
-
-  function resetForm() {
-    editingId = null;
-    form.reset();
-    $("#fbaFormTitle").textContent = "Add feedback";
-    $("#fbaSave").textContent = "Add feedback";
-    $("#fbaCancel").hidden = true;
-  }
-  function startEdit(f) {
-    editingId = f.id;
-    form.reset();
-    $("#fbaName").value = f.name;
-    $("#fbaRole").value = f.role || "";
-    $("#fbaRating").value = String(f.rating || 0);
-    $("#fbaMessage").value = f.message;
-    $("#fbaVisible").checked = f.visible !== false;
-    $("#fbaFormTitle").textContent = "Edit feedback";
-    $("#fbaSave").textContent = "Save changes";
-    $("#fbaCancel").hidden = false;
-    say($("#fbaMsg"), "");
-    form.scrollIntoView({ behavior: "smooth", block: "start" });
-    $("#fbaName").focus();
-  }
-  $("#fbaCancel").addEventListener("click", function () { resetForm(); say($("#fbaMsg"), ""); });
-
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-    var msg = $("#fbaMsg");
-    say(msg, "");
-    var name = $("#fbaName").value.trim();
-    var message = $("#fbaMessage").value.trim();
-    if (!name) return say(msg, "Enter a name.", "error");
-    if (!message) return say(msg, "Enter the feedback text.", "error");
-    if (message.length > 300) return say(msg, "Keep the feedback to 300 characters or fewer.", "error");
-
-    var entry = {
-      id: editingId || newId(),
-      name: name.slice(0, 60),
-      role: $("#fbaRole").value.trim().slice(0, 60),
-      rating: Number($("#fbaRating").value) || 0,
-      message: message,
-      visible: $("#fbaVisible").checked
-    };
-    var list = PF.feedback.all(), next;
-    if (editingId) next = list.map(function (x) { return x.id === editingId ? entry : x; });
-    else {
-      if (list.length >= MAX) return say(msg, "Limit of " + MAX + " entries reached.", "error");
-      next = list.concat(entry);
+    case "reject":
+    case "pending": {
+      const it = find();
+      if (it.status !== STATUS[b.action]) { it.status = STATUS[b.action]; it.order = 0; changed.push(it); }
+      break;
     }
-    var wasEdit = !!editingId;
-    if (persist(next, msg)) {
-      resetForm();
-      say(msg, wasEdit ? "Saved. Click Apply Changes to publish." : "Added. Click Apply Changes to publish.", "ok");
+    case "delete": {
+      const it = find();
+      await L.redis(["HDEL", L.HASH, it.id]);
+      all.splice(all.indexOf(it), 1);
+      break;
     }
-  });
+    case "update": {
+      const it = find();
+      const name = L.clean(b.name, 60), message = L.clean(b.message, 1000);
+      if (!message) throw new L.HttpError(400, "Enter the feedback text.");
+      if (it.status === "accepted" && message.length > L.SLIDER_MAX) throw tooLong(message);
+      it.name = name; it.role = L.clean(b.role, 60); it.rating = L.cleanRating(b.rating); it.message = message;
+      changed.push(it);
+      break;
+    }
+    case "add": {
+      const name = L.clean(b.name, 60), message = L.clean(b.message, 1000);
+      if (!name) throw new L.HttpError(400, "Enter a name.");
+      if (!message) throw new L.HttpError(400, "Enter the feedback text.");
+      if (message.length > L.SLIDER_MAX) throw tooLong(message);
+      if (all.length >= L.MAX_ITEMS) throw new L.HttpError(400, "Limit of " + L.MAX_ITEMS + " entries reached. Delete some first.");
+      const it = {
+        id: require("crypto").randomBytes(6).toString("hex"), name, role: L.clean(b.role, 60), email: "",
+        rating: L.cleanRating(b.rating), message, status: "accepted", source: "admin",
+        createdAt: Date.now(), order: nextOrder()
+      };
+      all.push(it); changed.push(it);
+      break;
+    }
+    case "move": {
+      const it = find();
+      const acc = all.filter((i) => i.status === "accepted").sort(L.byOrder);
+      const from = acc.indexOf(it), to = from + (Number(b.dir) < 0 ? -1 : 1);
+      if (from < 0 || to < 0 || to >= acc.length) break;
+      acc.splice(to, 0, acc.splice(from, 1)[0]);
+      acc.forEach((i, k) => { if (i.order !== k + 1) { i.order = k + 1; changed.push(i); } });
+      break;
+    }
+    default:
+      throw new L.HttpError(400, "Unknown action.");
+  }
 
-  resetForm();
-  render();
-})();
+  if (changed.length) await L.saveItems(changed);
+  L.send(res, 200, { ok: true, items: all.sort((a, b) => b.createdAt - a.createdAt) });
+});
