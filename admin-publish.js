@@ -1,4 +1,4 @@
-/* Apply Changes: publishes projects.json, skills.json and cv.pdf to your GitHub
+/* Apply Changes: publishes projects.json, skills.json and cv.pdf (feedback lives on the server, see api/) to your GitHub
  * repository so that visitors see your changes.
  *
  * It runs entirely in the browser and talks to GitHub's API directly (no server,
@@ -179,15 +179,6 @@
         });
         files.push({ name: "skills.json", bytes: textBytes(JSON.stringify(skills, null, 2)) });
       } else notes.push("skills.json: nothing saved in this browser yet, so it was skipped");
-    }
-    if ($("#pubFeedback").checked) {
-      if (PF.feedback.has()) {
-        // Only visible entries leave this browser: hidden feedback stays private
-        var fb = PF.feedback.all().filter(function (f) { return f.visible !== false; }).map(function (f) {
-          return { name: f.name, role: f.role || "", rating: f.rating || 0, message: f.message };
-        });
-        files.push({ name: "feedback.json", bytes: textBytes(JSON.stringify(fb, null, 2)) });
-      } else notes.push("feedback.json: nothing saved in this browser yet, so it was skipped");
     }
     if ($("#pubCv").checked) {
       var cv = PF.cv.get();
