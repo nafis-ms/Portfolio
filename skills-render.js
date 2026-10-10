@@ -1,7 +1,4 @@
-/* Skills renderer: draws glossy white 3D spheres with a logo decal using plain
- * WebGL (no libraries). The world matches skills-physics.js: the visible
- * half-height at z = 0 is 1 and the visible half-width is the aspect ratio.
- * The page background shows through (the canvas is transparent). */
+
 (function (root) {
   "use strict";
 
@@ -31,7 +28,11 @@
   ].join("\n");
 
   var FRAG = [
+    "#ifdef GL_FRAGMENT_PRECISION_HIGH",
     "precision highp float;",
+    "#else",
+    "precision mediump float;",
+    "#endif",
     "varying vec3 vObj;",
     "varying vec3 vNormal;",
     "varying vec3 vWorld;",
