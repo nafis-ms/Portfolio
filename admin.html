@@ -176,8 +176,6 @@
                     checked> Projects</label>
                 <label class="check chip"><input id="pubSkills" type="checkbox"
                     checked> Skills</label>
-                <label class="check chip"><input id="pubFeedback" type="checkbox"
-                    checked> Feedback</label>
                 <label class="check chip"><input id="pubCv" type="checkbox"
                     checked> CV</label>
               </div>
@@ -405,14 +403,33 @@
           <section data-panel="feedback" class="tab" hidden>
             <div class="tab-head">
               <h2>Feedback</h2>
-              <p>Visitors' feedback arrives in your email. Add the ones you want
-                to show here. Only <b>visible</b> entries are published; hidden
-                ones stay private in this browser.</p>
+              <p>Feedback sent from your site arrives in <b>Pending</b>.
+                <b>Accept</b> it to show it in the slider on your site, or
+                <b>Reject</b> it: it then stays in <b>Rejected</b>. You can also
+                add your own. Changes are live right away, no Apply Changes
+                needed.</p>
+            </div>
+
+            <div class="panel">
+              <h3>Connection</h3>
+              <form id="fbaKeyForm" class="row wrap-row" style="margin-top:0">
+                <input id="fbaKey" type="password" autocomplete="off"
+                  placeholder="Admin key (the ADMIN_KEY you set in Vercel)"
+                  aria-label="Admin key">
+                <button id="fbaConnect" class="btn" type="submit">Connect</button>
+                <button id="fbaDisconnect" class="btn ghost" type="button"
+                  hidden>Disconnect</button>
+              </form>
+              <label class="check"><input id="fbaRemember" type="checkbox">
+                Remember the key on this device</label>
+              <p id="fbaConn" class="msg" role="status"></p>
             </div>
 
             <div class="split">
               <div class="panel">
                 <h3 id="fbaFormTitle">Add feedback</h3>
+                <p class="hint" style="margin:-0.4rem 0 0.8rem">Feedback you add
+                  here goes straight to the slider.</p>
                 <form id="fbaForm" novalidate>
                   <div class="fields two">
                     <div class="field">
@@ -438,10 +455,7 @@
                   </select>
 
                   <label for="fbaMessage">Feedback (max 300 characters)</label>
-                  <textarea id="fbaMessage" rows="4" maxlength="300"></textarea>
-
-                  <label class="check switch-row"><input id="fbaVisible"
-                      type="checkbox" checked> Show in the slider</label>
+                  <textarea id="fbaMessage" rows="4"></textarea>
 
                   <div class="row">
                     <button id="fbaSave" class="btn" type="submit">Add
@@ -454,19 +468,21 @@
               </div>
 
               <div class="stack">
-                <div class="list-head">
-                  <h3>Feedback on your site <span id="fbaCount"
-                      class="count"></span></h3>
+                <div class="list-head fba-head">
+                  <div class="chips fba-tabs" role="group" aria-label="Feedback status">
+                    <button type="button" class="btn ghost sm" data-fbtab="pending">Pending <span class="count" id="fbaCntPending"></span></button>
+                    <button type="button" class="btn ghost sm" data-fbtab="accepted">Accepted <span class="count" id="fbaCntAccepted"></span></button>
+                    <button type="button" class="btn ghost sm" data-fbtab="rejected">Rejected <span class="count" id="fbaCntRejected"></span></button>
+                  </div>
+                  <button id="fbaRefresh" class="btn ghost sm" type="button">Refresh</button>
                 </div>
+                <p id="fbaListMsg" class="msg" role="status"></p>
                 <ul id="fbaList" class="list"></ul>
-                <p id="fbaEmpty" class="empty-state" hidden>No feedback yet, so
-                  the slider on your site shows an invitation to leave some. Add
-                  one on the left.</p>
+                <p id="fbaEmpty" class="empty-state" hidden></p>
               </div>
             </div>
           </section>
 
-          <!-- ============ CV ============ -->
           <section data-panel="cv" class="tab" hidden>
             <div class="tab-head">
               <h2>CV</h2>
