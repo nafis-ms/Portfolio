@@ -35,10 +35,10 @@
   }
   function refresh() {
     if (!window.PF) return;
-    var p = PF.projects.all().length, s = PF.skills.all().length, f = PF.feedback.all().length;
-    set("#statProjects", p); set("#statSkills", s); set("#statFeedback", f);
+    var p = PF.projects.all().length, s = PF.skills.all().length;
+    set("#statProjects", p); set("#statSkills", s);
     set("#statCv", PF.cv.get() ? "Yes" : "No");
-    badge("projects", p); badge("skills", s); badge("feedback", f);
+    badge("projects", p); badge("skills", s);      // feedback numbers are set by admin-feedback.js
   }
   ["#count", "#skillCount", "#fbaCount", "#cvStatus"].forEach(function (sel) {
     var el = document.querySelector(sel);
