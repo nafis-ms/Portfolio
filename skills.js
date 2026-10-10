@@ -1,4 +1,14 @@
-
+/* Skills section: loads the skills saved in the admin panel and shows them as a
+ * floating cluster of glossy 3D spheres.
+ *
+ *   data:         store.js (PF.skills) or a published skills.json
+ *   physics:      skills-physics.js
+ *   rendering:    skills-render.js
+ *   this file:    data loading, cursor/touch interaction, the animation loop,
+ *                 resizing, reduced motion and the no-WebGL fallback
+ *
+ * Skill shape: { id, name, logo, category, size: "small"|"medium"|"large", visible }
+ * Add, edit, hide or delete skills in admin.html; nothing is hardcoded here. */
 (function () {
   "use strict";
 
@@ -22,6 +32,8 @@
   var reduce = !forceMotion && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var world = SkillsPhysics.createWorld();
+  // Reduced-motion devices: calmer idle drift, but the spheres still react when you move or tap
+  if (reduce) world.config.idleDrift *= 0.35;
   var renderer = null;
   var items = [];                // visible skills, in display order
   var texKeys = {};              // id -> what the current texture was made from
@@ -143,7 +155,6 @@
   }
 
   function onPointerMove(e) {
-    if (reduce) return;
     var p = toWorld(e), now = performance.now();
     if (ptr.on) {
       // Cursor velocity from the previous and current position (smoothed)
@@ -179,7 +190,7 @@
   }
 
   function start() {
-    if (running || reduce || !renderer || !items.length || !visible || document.hidden) return;
+    if (running || !renderer || !items.length || !visible || document.hidden) return;
     running = true;
     last = performance.now();
     raf = requestAnimationFrame(frame);
@@ -232,6 +243,10 @@
 
   if (renderer) {
     listen(canvas, "pointermove", onPointerMove, { passive: true });
+    listen(canvas, "pointerdown", function (e) {      // tap / click: the spheres scatter
+      var p = toWorld(e);
+      world.impulse(p.x, p.y, 3.2);
+    });
     listen(canvas, "pointerleave", onPointerEnd);
     listen(canvas, "pointercancel", onPointerEnd);
     listen(canvas, "pointerup", function (e) { if (e.pointerType !== "mouse") onPointerEnd(); });
