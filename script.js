@@ -1,6 +1,10 @@
 const $ = (id) => document.getElementById(id);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Phones / tablets / narrow screens: use light images instead of the .webm videos
+const LITE = matchMedia(
+  "(hover: none), (pointer: coarse), (max-width: 700px)",
+).matches;
 
 /* ---------- Navbar ---------- */
 (function () {
@@ -160,11 +164,13 @@ const vid = $("charVideo");
 const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(
   navigator.userAgent,
 );
-if (vid && !isSafari) {
+if (vid && !isSafari && !LITE) {
   vid.addEventListener("loadeddata", () => stage.classList.add("use-video"));
   vid.addEventListener("error", () => stage.classList.remove("use-video"));
+  vid.preload = "auto";
   vid.load();
 } else if (vid) {
+  // mobile / Safari: never download character.webm, keep front/left/right.webp
   vid.remove();
 }
 
@@ -371,6 +377,43 @@ fitTitle();
     hit = $("charHit"),
     section = $("projects");
   if (!char || !video || !hit || !section) return;
+
+  /* Mobile / touch: no video. Show src/work.png, and src/hi.png while hovered / tapped. */
+  if (LITE) {
+    const WORK = "src/work.png",
+      HI = "src/hi.png";
+    const img = document.createElement("img");
+    img.className = "char-img";
+    img.src = WORK;
+    img.alt = "Character working on a laptop";
+    img.draggable = false;
+    video.replaceWith(img);
+    new Image().src = HI; // preload so the swap is instant
+    let t = 0;
+    const sayHi = () => {
+      clearTimeout(t);
+      img.src = HI;
+      char.classList.add("is-hi");
+    };
+    const back = (e) => {
+      clearTimeout(t);
+      // finger: keep the greeting visible a moment after the tap
+      t = setTimeout(
+        () => {
+          img.src = WORK;
+          char.classList.remove("is-hi");
+        },
+        e.pointerType === "mouse" ? 250 : 1400,
+      );
+    };
+    hit.addEventListener("pointerenter", sayHi);
+    hit.addEventListener("pointerdown", sayHi);
+    hit.addEventListener("pointerleave", back);
+    hit.addEventListener("pointercancel", back);
+    return;
+  }
+
+  video.preload = "auto";
 
   const FPS = 24;
   const f = (n) => n / FPS;
