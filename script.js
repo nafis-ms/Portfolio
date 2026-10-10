@@ -393,10 +393,10 @@ fitTitle();
     section = $("projects");
   if (!char || !video || !hit || !section) return;
 
-  /* Mobile / touch: no video. Show work.png, and hi.png while hovered / tapped.
+  /* Every device: no video. Show work.webp, and hi.webp with the "Hi!" message while hovered / tapped.
    * The images are looked for in src/, then next to index.html, so a wrong folder cannot make
    * the character vanish. If none is found, the poster image (then the text) is shown instead. */
-  if (LITE) {
+  {
     const DIRS = ["src/", "", "images/", "assets/"];
     const EXTS = ["webp", "png"]; // work.webp / hi.webp are the light versions
     const img = document.createElement("img");
