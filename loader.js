@@ -32,7 +32,8 @@
   } catch (e) { /* storage blocked */ }
   var forceMotion = false;
   try { forceMotion = localStorage.getItem("portfolio-motion") === "on"; } catch (e) { /* blocked */ }
-  var reduce = !forceMotion && window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // The loader is short (about 2.5 s), so it plays fully on every device, even with "reduce motion" on.
+  var reduce = false;
   var START = 0.4, STAGGER = 0.12;   // seconds: when the first hop starts, and the gap between tiles
   var lastTile = START + (CONFIG.tiles.length - 1) * STAGGER;
   // stay at least until the last tile has finished its final bounce
@@ -82,13 +83,6 @@
     "  0%{transform:translateY(0) scale(1,1);opacity:1}",
     "  22%{transform:translateY(0) scale(1.2,.8);opacity:1}",
     "  100%{transform:translateY(-85vh) scale(.45,2.8);opacity:0}",
-    "}",
-
-    "@media (prefers-reduced-motion:reduce){",
-    "  .ld-body,.ld-star{animation:none}",
-    "  .ld-tile{animation:ld-pulse 1.2s ease-in-out infinite alternate}",
-    "  .ld.is-leaving .ld-tile{animation:none}",
-    "  @keyframes ld-pulse{from{opacity:.45}to{opacity:1}}",
     "}"
   ].join("\n");
 
