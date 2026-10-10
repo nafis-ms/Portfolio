@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Java",
+    "logo": "",
+    "category": "",
+    "size": "medium",
+    "visible": true
+  },
+  {
+    "name": "C++",
+    "logo": "",
+    "category": "",
+    "size": "medium",
+    "visible": true
+  },
+  {
+    "name": "C",
+    "logo": "",
+    "category": "",
+    "size": "medium",
+    "visible": true
+  },
+  {
+    "name": "HTML",
+    "logo": "",
+    "category": "",
+    "size": "medium",
+    "visible": true
+  },
+  {
+    "name": "CSS",
+    "logo": "",
+    "category": "",
+    "size": "medium",
+    "visible": true
+  },
+  {
+    "name": "JavaScript",
+    "logo": "",
+    "category": "",
+    "size": "medium",
+    "visible": true
+  },
+  {
+    "name": "MySQL",
+    "logo": "",
+    "category": "",
+    "size": "medium",
+    "visible": true
+  },
+  {
+    "name": "Python",
+    "logo": "",
+    "category": "",
+    "size": "small",
+    "visible": true
+  }
+]
