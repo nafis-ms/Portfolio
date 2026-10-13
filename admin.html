@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#0c0c0c" id="metaTheme">
+    <script>
+      /* Apply the saved theme (shared with the site) before the page paints. */
+      (function () {
+        var t = "dark";
+        try { t = localStorage.getItem("portfolio-theme") === "light" ? "light" : "dark"; } catch (e) {}
+        document.documentElement.setAttribute("data-theme", t);
+        var m = document.getElementById("metaTheme");
+        if (m) m.setAttribute("content", t === "light" ? "#f5f6fa" : "#0c0c0c");
+      })();
+    </script>
+    <title>Admin - Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="js/theme.js" defer></script>
+    <script src="js/fb-store.js"></script>
+    <script src="js/admin-api.js"></script>
+    <script src="js/admin.js" defer></script>
+    <script src="js/admin-skills.js" defer></script>
+    <script src="js/admin-feedback.js" defer></script>
+    <script src="js/admin-profile.js" defer></script>
+    <script src="js/admin-ui.js" defer></script>
+  </head>
+  <body>
+
+    <!-- Login / first-time setup -->
+    <div class="gate-theme" id="gateTheme">
+      <button class="icon-btn theme-toggle" type="button"
+        aria-label="Switch to light mode" title="Switch to light mode"
+        aria-pressed="false">
+        <svg class="ico-moon" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" aria-hidden="true"><path
+            d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+        <svg class="ico-sun" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12"
+            r="4" /><path
+            d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+      </button>
+    </div>
+
+    <main id="gate" class="narrow" hidden>
+      <form id="gateForm" class="panel gate-card">
+        <div class="brand brand-lg"><span class="bars"><i></i><i></i><i></i></span></div>
+        <h1 id="gateTitle">Admin login</h1>
+        <p id="gateText" class="hint">Enter the admin password you set as
+          <b>ADMIN_PASSWORD</b> in Vercel.</p>
+        <label for="gPass">Password</label>
+        <input id="gPass" type="password" autocomplete="current-password"
+          required>
+        <button id="gBtn" class="btn" type="submit">Sign in</button>
+        <p id="gMsg" class="msg" role="alert"></p>
+      </form>
+    </main>
+
+    <!-- Dashboard -->
+    <div id="app" hidden>
+      <header class="top">
+        <div class="brand">
+          <span class="bars"><i></i><i></i><i></i></span>
+          <div>
+            <strong>Portfolio admin</strong>
+            <small>Manage what visitors see</small>
+          </div>
+        </div>
+        <div class="top-actions">
+          <a class="link" href="index.html" target="_blank" rel="noopener">View
+            site &#8599;</a>
+          <button class="icon-btn theme-toggle" type="button"
+            aria-label="Switch to light mode" title="Switch to light mode"
+            aria-pressed="false">
+            <svg class="ico-moon" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true"><path
+                d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+            <svg class="ico-sun" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12"
+                r="4" /><path
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+          </button>
+          <button id="logout" class="btn ghost sm" type="button">Log out</button>
+        </div>
+      </header>
+
+      <div class="shell">
+        <!-- Sidebar (becomes a tab bar on small screens) -->
+        <nav class="side" aria-label="Admin sections">
+          <button class="navbtn" type="button" data-tab="overview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><path
+                d="M4 13h6V4H4zM14 20h6V4h-6zM4 20h6v-3H4z" /></svg>
+            <span>Overview</span>
+          </button>
+          <button class="navbtn" type="button" data-tab="projects">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><rect x="3" y="3" width="7" height="7"
+                rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect
+                x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14"
+                width="7" height="7" rx="1.5" /></svg>
+            <span>Projects</span><em class="badge" data-badge="projects"></em>
+          </button>
+          <button class="navbtn" type="button" data-tab="skills">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><circle cx="12" cy="12" r="9" /><path
+                d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M3 12h18" /></svg>
+            <span>Skills</span><em class="badge" data-badge="skills"></em>
+          </button>
+          <button class="navbtn" type="button" data-tab="feedback">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><path
+                d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" /></svg>
+            <span>Feedback</span><em class="badge" data-badge="feedback"></em>
+          </button>
+          <button class="navbtn" type="button" data-tab="profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><circle cx="12" cy="8" r="4" /><path
+                d="M4 21a8 8 0 0 1 16 0" /></svg>
+            <span>Profile</span>
+          </button>
+          <button class="navbtn" type="button" data-tab="cv">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><path
+                d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path
+                d="M14 3v5h5M9 13h6M9 17h6" /></svg>
+            <span>CV</span>
+          </button>
+          <button class="navbtn" type="button" data-tab="account">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><rect x="4" y="11" width="16" height="10"
+                rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+            <span>Account</span>
+          </button>
+        </nav>
+
+        <main class="content">
+
+          <!-- ============ OVERVIEW ============ -->
+          <section data-panel="overview" class="tab" hidden>
+            <div class="tab-head">
+              <h2>Overview</h2>
+              <p>Everything you change here is saved on the server and goes
+                live on your site straight away.</p>
+            </div>
+
+            <div class="stats">
+              <div class="stat"><b id="statProjects">0</b><span>Projects</span></div>
+              <div class="stat"><b id="statSkills">0</b><span>Skills</span></div>
+              <div class="stat"><b id="statFeedback">0</b><span>Feedback shown</span></div>
+              <div class="stat"><b id="statCv">No</b><span>CV uploaded</span></div>
+            </div>
+
+            <div class="panel">
+              <h3>Connection</h3>
+              <p id="ovMsg" class="msg" role="status">Checking...</p>
+              <p class="hint">Visitors see changes the next time they open or
+                refresh the page. Nothing needs publishing or redeploying.</p>
+            </div>
+          </section>
+
+          <!-- ============ PROJECTS ============ -->
+          <section data-panel="projects" class="tab" hidden>
+            <div class="tab-head">
+              <h2>Projects</h2>
+              <p>The cards that orbit around the character on your site.</p>
+            </div>
+
+            <div class="split">
+              <div class="panel">
+                <h3 id="formTitle">Add a project</h3>
+                <form id="projectForm" novalidate>
+                  <label for="title">Project name</label>
+                  <input id="title" type="text" maxlength="80"
+                    placeholder="Aura Brand Identity">
+
+                  <label for="url">Project URL</label>
+                  <input id="url" type="url" maxlength="500"
+                    placeholder="https://example.com">
+
+                  <label for="image">Image</label>
+                  <input id="image" type="file" accept="image/*">
+                  <p class="hint">Any image. It is resized to fit before it is
+                    uploaded. Landscape (16:10) fits the card best.</p>
+                  <img id="preview" class="preview" alt="Image preview" hidden>
+
+                  <div class="row">
+                    <button id="save" class="btn" type="submit">Add
+                      project</button>
+                    <button id="cancel" class="btn ghost" type="button"
+                      hidden>Cancel</button>
+                  </div>
+                  <p id="formMsg" class="msg" role="status"></p>
+                </form>
+              </div>
+
+              <div class="stack">
+                <div class="list-head">
+                  <h3>Live on your site <span id="count" class="count"></span></h3>
+                </div>
+                <ul id="list" class="list"></ul>
+                <p id="empty" class="empty-state" hidden>No projects yet, so
+                  nothing is rotating on your site. Add one to start the
+                  orbit.</p>
+
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ SKILLS ============ -->
+          <section data-panel="skills" class="tab" hidden>
+            <div class="tab-head">
+              <h2>Skills</h2>
+              <p>The 3D spheres floating in the Skills section.</p>
+            </div>
+
+            <div class="split">
+              <div class="panel">
+                <h3 id="skillFormTitle">Add a skill</h3>
+                <form id="skillForm" novalidate>
+                  <label for="skillName">Skill name</label>
+                  <input id="skillName" type="text" maxlength="40"
+                    placeholder="JavaScript">
+
+                  <label for="skillLogo">Logo</label>
+                  <input id="skillLogo" type="file" accept="image/*">
+                  <p class="hint">PNG, SVG or WebP with a transparent
+                    background works best. It is resized to fit before it is
+                    uploaded. Without a logo, the skill's name is printed on
+                    the sphere.</p>
+                  <img id="skillPreview" class="preview logo-preview"
+                    alt="Logo preview" hidden>
+                  <div class="row">
+                    <button id="skillLogoClear" class="btn ghost sm"
+                      type="button" hidden>Remove logo</button>
+                  </div>
+
+                  <div class="fields two">
+                    <div class="field">
+                      <label for="skillCategory">Category (optional)</label>
+                      <input id="skillCategory" type="text" maxlength="40"
+                        placeholder="Frontend">
+                    </div>
+                    <div class="field">
+                      <label for="skillSize">Sphere size</label>
+                      <select id="skillSize">
+                        <option value="small">Small</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="large">Large</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <label class="check switch-row"><input id="skillVisible"
+                      type="checkbox" checked> Show on my site</label>
+
+                  <div class="row">
+                    <button id="skillSave" class="btn" type="submit">Add
+                      skill</button>
+                    <button id="skillCancel" class="btn ghost" type="button"
+                      hidden>Cancel</button>
+                  </div>
+                  <p id="skillMsg" class="msg" role="status"></p>
+                </form>
+              </div>
+
+              <div class="stack">
+                <div class="list-head">
+                  <h3>Skills on your site <span id="skillCount"
+                      class="count"></span></h3>
+                </div>
+                <ul id="skillList" class="list"></ul>
+                <p id="skillEmpty" class="empty-state" hidden>No skills yet, so
+                  the Skills section is hidden on your site. Add one, or use
+                  <b>Add sample skills</b> below to try it out.</p>
+
+                <details class="fold">
+                  <summary>Sample skills</summary>
+                  <div class="fold-body">
+                    <p class="hint">Adds a set of common skills with generated
+                      badges so you can see how the spheres look. Edit each one
+                      later to upload its real logo.</p>
+                    <div class="row wrap-row">
+                      <button id="skillSamples" class="btn ghost sm"
+                        type="button">Add sample skills</button>
+                    </div>
+                    <p id="skillDataMsg" class="msg" role="status"></p>
+                  </div>
+                </details>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ FEEDBACK ============ -->
+          <section data-panel="feedback" class="tab" hidden>
+            <div class="tab-head">
+              <h2>Feedback</h2>
+              <p>Feedback sent from your site arrives in <b>Pending</b>.
+                <b>Accept</b> it to show it in the slider on your site, or
+                <b>Reject</b> it: it then stays in <b>Rejected</b> and visitors never
+                see it. You can also add your own.</p>
+            </div>
+
+            <div id="fbaMain" class="split">
+              <div class="panel">
+                <h3 id="fbaFormTitle">Add feedback</h3>
+                <p class="hint" style="margin:-0.4rem 0 0.8rem">Feedback you add
+                  here goes straight to the slider.</p>
+                <form id="fbaForm" novalidate>
+                  <div class="fields two">
+                    <div class="field">
+                      <label for="fbaName">Name</label>
+                      <input id="fbaName" type="text" maxlength="60"
+                        placeholder="Sam Rahman">
+                    </div>
+                    <div class="field">
+                      <label for="fbaRole">Role or place (optional)</label>
+                      <input id="fbaRole" type="text" maxlength="60"
+                        placeholder="Classmate, Recruiter...">
+                    </div>
+                  </div>
+
+                  <label class="check"><input id="fbaAnon" type="checkbox"> Show as Anonymous</label>
+
+                  <label for="fbaRating">Rating</label>
+                  <select id="fbaRating">
+                    <option value="5" selected>5 stars</option>
+                    <option value="4">4 stars</option>
+                    <option value="3">3 stars</option>
+                    <option value="2">2 stars</option>
+                    <option value="1">1 star</option>
+                    <option value="0">No rating</option>
+                  </select>
+
+                  <label for="fbaMessage">Feedback (max 300 characters)</label>
+                  <textarea id="fbaMessage" rows="4"></textarea>
+
+                  <div class="row">
+                    <button id="fbaSave" class="btn" type="submit">Add
+                      feedback</button>
+                    <button id="fbaCancel" class="btn ghost" type="button"
+                      hidden>Cancel</button>
+                  </div>
+                  <p id="fbaMsg" class="msg" role="status"></p>
+                </form>
+              </div>
+
+              <div class="stack">
+                <div class="list-head fba-head">
+                  <div class="chips fba-tabs" role="group" aria-label="Feedback status">
+                    <button type="button" class="btn ghost sm" data-fbtab="pending">Pending <span class="count" id="fbaCntPending"></span></button>
+                    <button type="button" class="btn ghost sm" data-fbtab="accepted">Accepted <span class="count" id="fbaCntAccepted"></span></button>
+                    <button type="button" class="btn ghost sm" data-fbtab="rejected">Rejected <span class="count" id="fbaCntRejected"></span></button>
+                  </div>
+                  <button id="fbaRefresh" class="btn ghost sm" type="button">Refresh</button>
+                </div>
+                <p id="fbaListMsg" class="msg" role="status"></p>
+                <ul id="fbaList" class="list"></ul>
+                <p id="fbaEmpty" class="empty-state" hidden></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ PROFILE ============ -->
+          <section data-panel="profile" class="tab" hidden>
+            <div class="tab-head">
+              <h2>Profile</h2>
+              <p>The About paragraph, your contact details and your social
+                links. Empty fields are hidden on your site.</p>
+            </div>
+            <form id="profForm" class="panel narrow-panel" novalidate>
+              <h3>About</h3>
+              <label for="profAbout">About paragraph</label>
+              <textarea id="profAbout" rows="7" maxlength="1200"
+                placeholder="Leave empty to keep the default text"></textarea>
+
+              <h3>Contact details</h3>
+              <label for="profPhone">Mobile number</label>
+              <input id="profPhone" type="tel" maxlength="40"
+                placeholder="+880 1XXX-XXXXXX" autocomplete="off">
+              <label for="profEmail">Email</label>
+              <input id="profEmail" type="email" maxlength="120"
+                placeholder="you@example.com" autocomplete="off">
+              <label for="profAddress">Address</label>
+              <input id="profAddress" type="text" maxlength="160"
+                placeholder="City, Country" autocomplete="off">
+
+              <h3>Social links</h3>
+              <label for="profFacebook">Facebook profile URL</label>
+              <input id="profFacebook" type="url" maxlength="300"
+                placeholder="https://facebook.com/your.name" autocomplete="off">
+              <label for="profLinkedin">LinkedIn profile URL</label>
+              <input id="profLinkedin" type="url" maxlength="300"
+                placeholder="https://linkedin.com/in/your-name" autocomplete="off">
+
+              <div class="row wrap-row">
+                <button class="btn" type="submit">Save profile</button>
+              </div>
+              <p id="profMsg" class="msg" role="status"></p>
+            </form>
+          </section>
+
+          <section data-panel="cv" class="tab" hidden>
+            <div class="tab-head">
+              <h2>CV</h2>
+              <p>The Download CV buttons appear on your site whenever a CV
+                exists.</p>
+            </div>
+            <div class="panel narrow-panel">
+              <p id="cvStatus" class="status-box">No CV uploaded yet.</p>
+              <label for="cvFile">Upload or replace CV (PDF, max 3 MB)</label>
+              <input id="cvFile" type="file" accept=".pdf,application/pdf">
+              <div class="row wrap-row">
+                <a id="cvView" class="btn ghost sm" href="#" target="_blank"
+                  rel="noopener" hidden>Preview</a>
+                <button id="cvRemove" class="btn ghost danger sm" type="button"
+                  hidden>Remove</button>
+              </div>
+              <p id="cvMsg" class="msg" role="status"></p>
+            </div>
+          </section>
+
+          <!-- ============ ACCOUNT ============ -->
+          <section data-panel="account" class="tab" hidden>
+            <div class="tab-head">
+              <h2>Account</h2>
+              <p>How this panel is locked.</p>
+            </div>
+            <div class="panel narrow-panel">
+              <h3>Admin password</h3>
+              <p class="hint">The password is checked by the server. To change
+                it, edit <b>ADMIN_PASSWORD</b> in Vercel (Settings, Environment
+                Variables) and redeploy. After 10 wrong attempts the panel
+                locks for a few minutes.</p>
+              <div class="row wrap-row">
+                <button id="logout2" class="btn ghost" type="button">Log out</button>
+              </div>
+            </div>
+          </section>
+
+        </main>
+      </div>
+    </div>
+
+  </body>
+</html>
