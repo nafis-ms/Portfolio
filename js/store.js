@@ -8,7 +8,7 @@
   function list(v) { return Array.isArray(v) ? v : []; }
 
   window.PF = {
-    // Profile: { about, phone, address, email, facebook, linkedin } (all strings, all optional)
+    // Profile: { about, phone, address, email, facebook, linkedin, whatsapp, discord, instagram } (all strings, all optional)
     profile: { get: function () { return site.profile && typeof site.profile === "object" ? site.profile : {}; } },
     // Skills: [{ id, name, logo, category, size, visible }] in display order
     skills: { all: function () { return list(site.skills); } },

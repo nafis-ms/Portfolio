@@ -22,8 +22,8 @@
       href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap"
       rel="stylesheet">
     <link rel="stylesheet" href="css/style.css?v=12">
-    <link rel="stylesheet" href="css/cinema.css?v=14">
-    <link rel="stylesheet" href="css/feedback.css?v=12">
+    <link rel="stylesheet" href="css/cinema.css?v=17">
+    <link rel="stylesheet" href="css/feedback.css?v=11">
   </head>
   <body>
     <div class="cine-progress" id="cineProgress" aria-hidden="true"></div>
@@ -41,9 +41,8 @@
             <ul class="gnav-links" id="navLinks">
               <li><a href="#home">Home</a></li>
               <li><a href="#about">About</a></li>
-              <li hidden><a href="#skills">Skills</a></li>
               <li><a href="#projects">Projects</a></li>
-              <li><a href="#feedback">Feedback</a></li>
+              <li hidden><a href="#skills">Skills</a></li>
               <li hidden><a href="#github">GitHub</a></li>
               <li hidden><a href="#social">Social</a></li>
               <li><a href="#contact">Contact</a></li>
@@ -53,7 +52,6 @@
             <div class="gnav-right">
               <a class="gnav-cta gnav-cv cv-btn" href="#" download="CV.pdf"
                 hidden>Download CV</a>
-              <a class="gnav-cta" href="#contact">Contact</a>
               <button class="icon-btn theme-toggle" id="themeToggle"
                 type="button" aria-label="Switch to light mode"
                 title="Switch to light mode" aria-pressed="false">
@@ -159,19 +157,6 @@
           </div>
         </section>
 
-        <!-- SKILLS (3D spheres are drawn by skills.js from the admin-managed skills) -->
-        <section class="skills snap-section" id="skills" aria-label="Skills"
-          hidden>
-          <div class="skills-stage" id="skillsStage">
-            <h2 class="hero-heading orbit-title">Skills</h2>
-            <canvas class="skills-canvas" id="skillsCanvas" role="img"
-              aria-label="Skills"></canvas>
-            <!-- shown instead of the canvas if WebGL is unavailable -->
-            <ul class="skills-fallback" id="skillsFallback"></ul>
-          </div>
-          <ul class="sr-only" id="skillsList"></ul>
-        </section>
-
         <!-- PROJECTS -->
         <section class="projects snap-section" id="projects"
           aria-label="Projects">
@@ -192,6 +177,88 @@
             </div>
             <!-- project cards are inserted here by script.js (from the admin panel) -->
             <div class="orbit-items" id="orbitItems"></div>
+          </div>
+        </section>
+
+        <!-- SKILLS (3D spheres are drawn by skills.js from the admin-managed skills) -->
+        <section class="skills snap-section" id="skills" aria-label="Skills"
+          hidden>
+          <div class="skills-stage" id="skillsStage">
+            <h2 class="hero-heading orbit-title">Skills</h2>
+            <canvas class="skills-canvas" id="skillsCanvas" role="img"
+              aria-label="Skills"></canvas>
+            <!-- shown instead of the canvas if WebGL is unavailable -->
+            <ul class="skills-fallback" id="skillsFallback"></ul>
+          </div>
+          <ul class="sr-only" id="skillsList"></ul>
+        </section>
+
+        <!-- GITHUB (filled in by github.js). Set data-user to your GitHub username;
+             while it is still the placeholder, the section and its nav link stay hidden. -->
+        <section class="github snap-section" id="github" aria-label="GitHub"
+          data-user="nafis-ms" hidden>
+          <div class="gh-wrap">
+            <h2 class="hero-heading section-title gh-title fade" data-y="40"
+              data-d="0">GitHub</h2>
+            <article class="gh-card fade" data-y="30" data-d="0.15"
+              id="ghCard" aria-busy="true">
+              <header class="gh-head">
+                <span class="gh-brand">
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path
+                      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" /></svg>
+                  <b>GitHub Stack</b>
+                </span>
+                <a class="gh-view" id="ghLink" href="https://github.com/"
+                  target="_blank" rel="noopener noreferrer">View profile</a>
+              </header>
+
+              <div class="gh-top">
+                <div class="gh-profile">
+                  <img class="gh-avatar" id="ghAvatar" width="64" height="64"
+                    alt="" hidden>
+                  <div class="gh-id">
+                    <h3 id="ghName">Loading...</h3>
+                    <p class="gh-handle" id="ghHandle"></p>
+                    <p class="gh-bio" id="ghBio"></p>
+                  </div>
+                </div>
+                <dl class="gh-stats">
+                  <div><dt>Repos</dt><dd id="ghRepos">-</dd></div>
+                  <div><dt>Stars</dt><dd id="ghStars">-</dd></div>
+                  <div><dt>Followers</dt><dd id="ghFollowers">-</dd></div>
+                  <div><dt>Following</dt><dd id="ghFollowing">-</dd></div>
+                </dl>
+              </div>
+
+              <div class="gh-langs" id="ghLangs" hidden>
+                <h3 class="gh-sub">Top languages</h3>
+                <div class="gh-langbar" id="ghLangBar" role="img"></div>
+                <ul class="gh-langlist" id="ghLangList"></ul>
+              </div>
+
+              <div class="gh-activity" id="ghActivity" hidden>
+                <div class="gh-activity-head">
+                  <h3 class="gh-sub">Contributions activity</h3>
+                  <span class="gh-total" id="ghTotal"></span>
+                </div>
+                <div class="gh-scroll" id="ghScroll">
+                  <div class="gh-cal" id="ghCal" role="img">
+                    <span></span>
+                    <div class="gh-months" id="ghMonths" aria-hidden="true"></div>
+                    <div class="gh-days" aria-hidden="true">
+                      <span>Mon</span><span>Wed</span><span>Fri</span>
+                    </div>
+                    <div class="gh-grid" id="ghGrid" aria-hidden="true"></div>
+                  </div>
+                </div>
+                <div class="gh-legend" aria-hidden="true">
+                  <span>Less</span><i data-l="0"></i><i data-l="1"></i><i
+                    data-l="2"></i><i data-l="3"></i><i data-l="4"></i><span>More</span>
+                </div>
+              </div>
+
+              <p class="gh-msg" id="ghMsg" role="status"></p>
+            </article>
           </div>
         </section>
 
@@ -275,75 +342,6 @@
           </div>
         </section>
 
-        <!-- GITHUB (filled in by github.js). Set data-user to your GitHub username;
-             while it is still the placeholder, the section and its nav link stay hidden. -->
-        <section class="github snap-section" id="github" aria-label="GitHub"
-          data-user="nafis-ms" hidden>
-          <div class="gh-wrap">
-            <h2 class="hero-heading section-title gh-title fade" data-y="40"
-              data-d="0">GitHub</h2>
-            <article class="gh-card fade" data-y="30" data-d="0.15"
-              id="ghCard" aria-busy="true">
-              <header class="gh-head">
-                <span class="gh-brand">
-                  <svg viewBox="0 0 16 16" aria-hidden="true"><path
-                      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" /></svg>
-                  <b>GitHub Stack</b>
-                </span>
-                <a class="gh-view" id="ghLink" href="https://github.com/"
-                  target="_blank" rel="noopener noreferrer">View profile</a>
-              </header>
-
-              <div class="gh-top">
-                <div class="gh-profile">
-                  <img class="gh-avatar" id="ghAvatar" width="64" height="64"
-                    alt="" hidden>
-                  <div class="gh-id">
-                    <h3 id="ghName">Loading...</h3>
-                    <p class="gh-handle" id="ghHandle"></p>
-                    <p class="gh-bio" id="ghBio"></p>
-                  </div>
-                </div>
-                <dl class="gh-stats">
-                  <div><dt>Repos</dt><dd id="ghRepos">-</dd></div>
-                  <div><dt>Stars</dt><dd id="ghStars">-</dd></div>
-                  <div><dt>Followers</dt><dd id="ghFollowers">-</dd></div>
-                  <div><dt>Following</dt><dd id="ghFollowing">-</dd></div>
-                </dl>
-              </div>
-
-              <div class="gh-langs" id="ghLangs" hidden>
-                <h3 class="gh-sub">Top languages</h3>
-                <div class="gh-langbar" id="ghLangBar" role="img"></div>
-                <ul class="gh-langlist" id="ghLangList"></ul>
-              </div>
-
-              <div class="gh-activity" id="ghActivity" hidden>
-                <div class="gh-activity-head">
-                  <h3 class="gh-sub">Contributions activity</h3>
-                  <span class="gh-total" id="ghTotal"></span>
-                </div>
-                <div class="gh-scroll" id="ghScroll">
-                  <div class="gh-cal" id="ghCal" role="img">
-                    <span></span>
-                    <div class="gh-months" id="ghMonths" aria-hidden="true"></div>
-                    <div class="gh-days" aria-hidden="true">
-                      <span>Mon</span><span>Wed</span><span>Fri</span>
-                    </div>
-                    <div class="gh-grid" id="ghGrid" aria-hidden="true"></div>
-                  </div>
-                </div>
-                <div class="gh-legend" aria-hidden="true">
-                  <span>Less</span><i data-l="0"></i><i data-l="1"></i><i
-                    data-l="2"></i><i data-l="3"></i><i data-l="4"></i><span>More</span>
-                </div>
-              </div>
-
-              <p class="gh-msg" id="ghMsg" role="status"></p>
-            </article>
-          </div>
-        </section>
-
         <!-- SOCIAL: links come from the admin panel (Profile tab); the section stays hidden until one is set -->
         <section class="social snap-section" id="social" aria-label="Social" hidden>
           <div class="social-inner">
@@ -360,6 +358,24 @@
                 href="#" target="_blank" rel="noopener noreferrer" hidden>
                 <span class="social-ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.9 8.9H3.7V20h3.2zM5.3 3.9a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8zM20.3 13.6c0-3-1.6-4.9-4.3-4.9-1.4 0-2.4.8-2.9 1.6V8.9H10V20h3.2v-6c0-1.6.8-2.5 2-2.5s1.9.9 1.9 2.5v6h3.2z"/></svg></span>
                 <span class="social-name">LinkedIn</span>
+                <span class="social-go">Visit profile &rarr;</span>
+              </a>
+              <a class="social-card tilt fade" data-net="whatsapp" data-y="30" data-d="0.4"
+                href="#" target="_blank" rel="noopener noreferrer" hidden>
+                <span class="social-ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></span>
+                <span class="social-name">WhatsApp</span>
+                <span class="social-go">Visit profile &rarr;</span>
+              </a>
+              <a class="social-card tilt fade" data-net="discord" data-y="30" data-d="0.5"
+                href="#" target="_blank" rel="noopener noreferrer" hidden>
+                <span class="social-ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg></span>
+                <span class="social-name">Discord</span>
+                <span class="social-go">Visit profile &rarr;</span>
+              </a>
+              <a class="social-card tilt fade" data-net="instagram" data-y="30" data-d="0.6"
+                href="#" target="_blank" rel="noopener noreferrer" hidden>
+                <span class="social-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></span>
+                <span class="social-name">Instagram</span>
                 <span class="social-go">Visit profile &rarr;</span>
               </a>
             </div>
@@ -394,6 +410,6 @@
     <script src="js/github.js?v=11"></script>
     <script src="js/feedback.js?v=11"></script>
     <script src="js/profile.js?v=11"></script>
-    <script src="js/cinema.js?v=13"></script>
+    <script src="js/cinema.js?v=15"></script>
   </body>
 </html>

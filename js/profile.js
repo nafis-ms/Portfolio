@@ -45,7 +45,7 @@
     }
 
     // Social links: a card shows only when its link is a valid http(s) address
-    var links = { facebook: httpUrl(p.facebook), linkedin: httpUrl(p.linkedin) };
+    var links = { facebook: httpUrl(p.facebook), linkedin: httpUrl(p.linkedin), whatsapp: httpUrl(p.whatsapp), discord: httpUrl(p.discord), instagram: httpUrl(p.instagram) };
     var anySocial = false;
     document.querySelectorAll(".social-card").forEach(function (card) {
       var href = links[card.dataset.net];

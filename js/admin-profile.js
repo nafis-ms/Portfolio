@@ -8,7 +8,8 @@
 
   var FIELDS = {
     about: "#profAbout", phone: "#profPhone", email: "#profEmail",
-    address: "#profAddress", facebook: "#profFacebook", linkedin: "#profLinkedin"
+    address: "#profAddress", facebook: "#profFacebook", linkedin: "#profLinkedin",
+    whatsapp: "#profWhatsapp", discord: "#profDiscord", instagram: "#profInstagram"
   };
 
   function say(text, kind) {

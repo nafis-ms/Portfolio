@@ -187,7 +187,7 @@ a.info-val:hover { text-decoration: underline; text-underline-offset: 3px; }
   align-items: center;
   gap: 2rem;
   text-align: center;
-  width: min(760px, 100%);
+  width: min(1080px, 100%);   /* wide enough for three cards per row */
 }
 .social-grid {
   display: flex;
@@ -219,6 +219,9 @@ a.info-val:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
 .social-ico svg { width: 30px; height: 30px; }
 .social-card[data-net="facebook"] .social-ico { background: linear-gradient(135deg, #1877f2, #0a4fb3); box-shadow: 0 10px 26px -8px rgba(24, 119, 242, 0.8); }
+.social-card[data-net="whatsapp"] .social-ico { background: linear-gradient(135deg, #25d366, #0e8c6a); box-shadow: 0 10px 26px -8px rgba(37, 211, 102, 0.75); }
+.social-card[data-net="discord"] .social-ico { background: linear-gradient(135deg, #5865f2, #3944c4); box-shadow: 0 10px 26px -8px rgba(88, 101, 242, 0.8); }
+.social-card[data-net="instagram"] .social-ico { background: linear-gradient(45deg, #f09433, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888); box-shadow: 0 10px 26px -8px rgba(220, 39, 67, 0.7); }
 .social-card[data-net="linkedin"] .social-ico { background: linear-gradient(135deg, #0a8ae6, #0a5fa8); box-shadow: 0 10px 26px -8px rgba(10, 102, 194, 0.8); }
 .social-name { font-size: 1.35rem; font-weight: 600; }
 .social-go { font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--card-muted); transition: color 0.3s, letter-spacing 0.4s var(--cine-ease); }
@@ -365,7 +368,7 @@ html.cine-ready .hero-bottom    { animation: cine-lift 1.4s var(--cine-ease) 0.9
   to   { opacity: 1; translate: 0 0; }
 }
 
-/* letterbox bars that open like a curtain */
+/* letterbox bars that open like a curtain: frosted glass panes */
 .cine-bar {
   position: fixed;
   left: 0;
@@ -373,25 +376,61 @@ html.cine-ready .hero-bottom    { animation: cine-lift 1.4s var(--cine-ease) 0.9
   height: 15vh;
   z-index: 9500;
   pointer-events: none;
-  background: var(--bar, #000);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 55%, rgba(139, 123, 255, 0.10)),
+    rgba(20, 18, 32, 0.38);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5) brightness(1.08);
+  backdrop-filter: blur(22px) saturate(1.5) brightness(1.08);
   will-change: transform;
 }
-.cine-bar.top { top: 0;    transform-origin: 50% 0;    border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
-.cine-bar.bot { bottom: 0; transform-origin: 50% 100%; border-top: 1px solid rgba(255, 255, 255, 0.2); }
-html[data-theme="light"] .cine-bar { --bar: #f5f6fa; }
-html[data-theme="light"] .cine-bar.top { border-bottom-color: rgba(20, 24, 40, 0.2); }
-html[data-theme="light"] .cine-bar.bot { border-top-color: rgba(20, 24, 40, 0.2); }
+.cine-bar.top {
+  top: 0;
+  transform-origin: 50% 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.34);
+  box-shadow: 0 1px 0 rgba(139, 123, 255, 0.25), 0 14px 40px -12px rgba(118, 33, 176, 0.45), inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+}
+.cine-bar.bot {
+  bottom: 0;
+  transform-origin: 50% 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.34);
+  box-shadow: 0 -1px 0 rgba(139, 123, 255, 0.25), 0 -14px 40px -12px rgba(118, 33, 176, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(0deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 55%, rgba(139, 123, 255, 0.10)),
+    rgba(20, 18, 32, 0.38);
+}
+/* a soft light streak across each pane, like a reflection on glass */
+.cine-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.16) 45%, transparent 60%);
+  pointer-events: none;
+}
+html[data-theme="light"] .cine-bar {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3) 60%, rgba(56, 189, 248, 0.14)),
+    rgba(235, 240, 250, 0.45);
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  backdrop-filter: blur(22px) saturate(1.6);
+}
+html[data-theme="light"] .cine-bar.bot {
+  background:
+    linear-gradient(0deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3) 60%, rgba(56, 189, 248, 0.14)),
+    rgba(235, 240, 250, 0.45);
+}
+html[data-theme="light"] .cine-bar.top { border-bottom-color: rgba(255, 255, 255, 0.9); box-shadow: 0 14px 40px -14px rgba(20, 24, 40, 0.3); }
+html[data-theme="light"] .cine-bar.bot { border-top-color: rgba(255, 255, 255, 0.9);   box-shadow: 0 -14px 40px -14px rgba(20, 24, 40, 0.3); }
 html.cine-ready .cine-bar { animation: cine-bar 1.5s cubic-bezier(0.76, 0, 0.24, 1) 0.1s forwards; }
 @keyframes cine-bar { to { transform: scaleY(0); } }
 
 /* one anamorphic lens-flare streak across the screen */
 .cine-flare {
-  position: fixed;
+  position: absolute;          /* lives inside .hero as its first child, so every hero element paints above it */
   left: 0;
   top: 50%;
   width: 80vw;
   height: 2px;
-  z-index: 9400;
+  z-index: 0;
   pointer-events: none;
   opacity: 0;
   background: linear-gradient(90deg, transparent, rgba(160, 175, 255, 0.95) 50%, transparent);
@@ -474,4 +513,135 @@ html.cine-ready .cine-flare { animation: cine-flare 2.4s cubic-bezier(0.4, 0, 0.
 @media (min-width: 821px) and (max-width: 1000px) {
   .gnav { padding: 0 0.75rem; gap: 0.4rem; }
   .gnav-links a { padding: 0.35rem 0.4rem; font-size: 0.8rem; }
+}
+
+/* =====================================================================
+   CINEMA 3: cinematic effects for the rest of the content.
+   Purely additive: nothing above is changed, and every rule is scoped to html.cine-fx
+   (added by cinema.js, never for "reduce motion"). It only uses properties that no existing
+   animation, transition or script touches (background-position, clip-path, filter on elements
+   that have none, rotate/translate on decorative bits).
+   ===================================================================== */
+
+/* ----- 1. Light scan across every card once it has revealed (then again, slowly, now and then) ----- */
+html.cine-fx .info-box::before,
+html.cine-fx .social-card::before,
+html.cine-fx .gh-card::before,
+html.cine-fx .fx-form::before,
+html.cine-fx .fx-board::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.13) 50%, transparent 62%) -170% 0 / 250% 100% no-repeat;
+  opacity: 0;
+}
+html.cine-fx[data-theme="light"] .info-box::before,
+html.cine-fx[data-theme="light"] .social-card::before,
+html.cine-fx[data-theme="light"] .gh-card::before,
+html.cine-fx[data-theme="light"] .fx-form::before,
+html.cine-fx[data-theme="light"] .fx-board::after {
+  background-image: linear-gradient(105deg, transparent 38%, rgba(14, 165, 233, 0.16) 50%, transparent 62%);
+}
+html.cine-fx .gh-card { position: relative; }
+html.cine-fx .info-box.in::before,
+html.cine-fx .social-card.in::before,
+html.cine-fx .gh-card.in::before,
+html.cine-fx .fx-form.in::before,
+html.cine-fx .fx-board.in::after {
+  animation: cine3-scan 12s cubic-bezier(0.4, 0, 0.2, 1) 0.8s infinite;
+}
+html.cine-fx .info-box:nth-child(2)::before { animation-delay: 1.6s; }
+html.cine-fx .info-box:nth-child(3)::before { animation-delay: 2.4s; }
+html.cine-fx .social-card:nth-child(2)::before { animation-delay: 1.8s; }
+html.cine-fx .fx-board.in::after { animation-delay: 2.6s; }
+@keyframes cine3-scan {
+  0%        { background-position: -170% 0; opacity: 1; }
+  14%, 100% { background-position: 170% 0;  opacity: 1; }
+}
+
+/* ----- 2. Icons breathe (brightness only) ----- */
+html.cine-fx .info-ico,
+html.cine-fx .social-ico { animation: cine3-breathe 4.5s ease-in-out infinite alternate; }
+html.cine-fx .info-box:nth-child(2) .info-ico { animation-delay: -1.5s; }
+html.cine-fx .info-box:nth-child(3) .info-ico { animation-delay: -3s; }
+html.cine-fx .social-card:nth-child(2) .social-ico { animation-delay: -2s; }
+@keyframes cine3-breathe {
+  from { filter: brightness(1) saturate(1); }
+  to   { filter: brightness(1.22) saturate(1.2); }
+}
+
+/* ----- 3. Projects: focus pull (blur to sharp) on the title, the character and each orbiting card ----- */
+html.cine-fx .projects:not(.cine-seen) .orbit-title,
+html.cine-fx .skills:not(.cine-seen) .orbit-title { opacity: 0; }
+html.cine-fx .projects:not(.cine-seen) .orbit-center,
+html.cine-fx .skills:not(.cine-seen) .skills-canvas { opacity: 0; }
+html.cine-fx .projects:not(.cine-seen) .orbit-card { filter: blur(14px) brightness(1.6); }
+
+html.cine-fx .projects.cine-seen .orbit-title,
+html.cine-fx .skills.cine-seen .orbit-title { animation: cine3-title 1.8s var(--cine-ease) backwards; }
+html.cine-fx .projects.cine-seen .orbit-center { animation: cine3-focus 1.8s var(--cine-ease) 0.25s backwards; }
+html.cine-fx .skills.cine-seen .skills-canvas  { animation: cine3-focus 1.8s var(--cine-ease) 0.3s backwards; }
+html.cine-fx .projects.cine-seen .orbit-card   { animation: cine3-card 1.5s var(--cine-ease) backwards; }
+html.cine-fx .projects.cine-seen .orbit-card:nth-child(1) { animation-delay: 0.50s; }
+html.cine-fx .projects.cine-seen .orbit-card:nth-child(2) { animation-delay: 0.62s; }
+html.cine-fx .projects.cine-seen .orbit-card:nth-child(3) { animation-delay: 0.74s; }
+html.cine-fx .projects.cine-seen .orbit-card:nth-child(4) { animation-delay: 0.86s; }
+html.cine-fx .projects.cine-seen .orbit-card:nth-child(5) { animation-delay: 0.98s; }
+html.cine-fx .projects.cine-seen .orbit-card:nth-child(6) { animation-delay: 1.10s; }
+html.cine-fx .projects.cine-seen .orbit-card:nth-child(n+7) { animation-delay: 1.2s; }
+@keyframes cine3-title {
+  from { opacity: 0; filter: blur(16px); letter-spacing: 0.08em; }
+  to   { opacity: 1; filter: blur(0);    letter-spacing: -0.025em; }
+}
+@keyframes cine3-focus {
+  from { opacity: 0; filter: blur(14px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+@keyframes cine3-card {
+  from { filter: blur(14px) brightness(1.6); }
+  to   { filter: blur(0) brightness(1); }
+}
+
+/* ----- 4. GitHub: the language bar and the activity grid are revealed like a wipe ----- */
+html.cine-fx .gh-card.in .gh-langbar { animation: cine3-wipe 1.5s var(--cine-ease) 0.5s backwards; }
+html.cine-fx .gh-card.in .gh-scroll  { animation: cine3-wipe 2s var(--cine-ease) 0.7s backwards; }
+@keyframes cine3-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+/* ----- 5. Feedback: the big quote mark floats ----- */
+html.cine-fx .fx-quote-mark { animation: cine3-float 8s ease-in-out infinite alternate; }
+@keyframes cine3-float {
+  from { translate: 0 0;    rotate: -2deg; }
+  to   { translate: 6px 8px; rotate: 2deg; }
+}
+
+/* ----- 6. The same slow ambient glow the other sections have, for Projects / Skills / GitHub ----- */
+html.cine-fx .projects, html.cine-fx .skills, html.cine-fx .github { position: relative; overflow: clip; }
+html.cine-fx .projects::before, html.cine-fx .skills::before, html.cine-fx .github::before {
+  content: "";
+  position: absolute;
+  width: 60vmax; height: 60vmax;
+  left: 50%; top: 50%;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(118, 33, 176, 0.2), transparent 62%);
+  pointer-events: none;
+  z-index: 0;
+  animation: cine-drift 18s ease-in-out infinite alternate;
+}
+html.cine-fx[data-theme="light"] .projects::before,
+html.cine-fx[data-theme="light"] .skills::before,
+html.cine-fx[data-theme="light"] .github::before {
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.15), transparent 62%);
+}
+html.cine-fx .gh-wrap { position: relative; z-index: 1; }
+
+@media (max-width: 640px) {
+  html.cine-fx .info-box::before, html.cine-fx .social-card::before, html.cine-fx .gh-card::before,
+  html.cine-fx .fx-form::before, html.cine-fx .fx-board::after { display: none; }   /* no idle sweeps on phones */
 }

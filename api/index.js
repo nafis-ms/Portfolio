@@ -32,7 +32,7 @@ async function R(...cmd) {
 const clone = o => JSON.parse(JSON.stringify(o));
 
 const DEFAULTS = {
-  profile: {},     /* {about, phone, email, address, facebook, linkedin}: empty = the page keeps its built-in text / hides the box */
+  profile: {},     /* {about, phone, email, address, facebook, linkedin, whatsapp, discord, instagram}: empty = the page keeps its built-in text / hides the box */
   projects: [],    /* [{id, title, url, image}] */
   skills: [],      /* [{id, name, logo, category, size, visible}] in display order */
   cv: null         /* {name, url} */
@@ -190,7 +190,8 @@ async function route(req, res, send) {
         if (email && !EMAIL.test(email)) throw new Error("That email address doesn't look right.");
         const c = await getContent();
         c.profile = { about: S(b.about, 1200), phone: S(b.phone, 40), email, address: S(b.address, 160),
-                      facebook: optUrl(b.facebook, "Facebook"), linkedin: optUrl(b.linkedin, "LinkedIn") };
+                      facebook: optUrl(b.facebook, "Facebook"), linkedin: optUrl(b.linkedin, "LinkedIn"),
+                      whatsapp: optUrl(b.whatsapp, "WhatsApp"), discord: optUrl(b.discord, "Discord"), instagram: optUrl(b.instagram, "Instagram") };
         await setContent(c); return send(200, c);
       }
 

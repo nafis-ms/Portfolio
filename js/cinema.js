@@ -123,7 +123,9 @@
   (function intro() {
     var top = make("div", "cine-bar top"), bot = make("div", "cine-bar bot"), flare = make("div", "cine-flare");
     root.classList.add("cine-prep");           // hero content waits (CSS also has a timed fail-safe)
-    body.append(top, bot, flare);
+    body.append(top, bot);
+    var heroEl = document.querySelector(".hero");
+    if (heroEl) heroEl.prepend(flare); else body.appendChild(flare);   // inside the hero: it passes BEHIND the text
 
     var started = false;
     function go() {
@@ -279,4 +281,126 @@
       wake();
     });
   })();
+})();
+
+/* ===== Cinematic layer 3 =====
+ * Switches on the extra content effects in cinema.css (scoped to html.cine-fx) and marks each section
+ * ".cine-seen" when it is on screen, so its entrance plays when you get there.
+ * On desktop the mark is removed again once the section is fully off screen, so the entrance plays
+ * EVERY time you arrive. On phones / tablets (same test as the "normal scrolling" rule above) it plays once.
+ * Skipped for "reduce motion". Does not touch scrolling or any existing effect. */
+(function () {
+  "use strict";
+  var forceMotion = false;
+  try { forceMotion = localStorage.getItem("portfolio-motion") === "on"; } catch (e) { /* blocked */ }
+  if (!forceMotion && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (!("IntersectionObserver" in window)) return;          // without it nothing is hidden, so nothing can get stuck
+
+  var replay = !matchMedia("(max-width: 820px), (hover: none) and (pointer: coarse)").matches;
+  var secs = Array.prototype.slice.call(document.querySelectorAll(".snap-section"));
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      e.target.classList.add("cine-seen");
+      if (!replay) io.unobserve(e.target);
+    });
+  }, { threshold: 0.2 });
+
+  document.documentElement.classList.add("cine-fx");
+  secs.forEach(function (s) { io.observe(s); });
+
+  if (replay) {
+    /* fully off screen (the 2px inset means a section that only touches the edge counts as gone) */
+    var off = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (!e.isIntersecting) e.target.classList.remove("cine-seen"); });
+    }, { rootMargin: "-2px 0px -2px 0px" });
+    secs.forEach(function (s) { off.observe(s); });
+  } else {
+    /* fail-safe: whatever has not been marked after 20 s is shown anyway */
+    setTimeout(function () { secs.forEach(function (s) { s.classList.add("cine-seen"); }); }, 20000);
+  }
+})();
+
+
+/* ===== Cinematic layer 4: replay the reveals every time a section comes back (desktop only) =====
+ * script.js reveals each ".fade" element once. Here, when a section has been completely off screen,
+ * its elements are put back to their hidden state, and shown again (with the same delays and the
+ * same transitions) as they come into view. The hero's opening animations are restarted too.
+ * Phones / tablets, "reduce motion" and browsers without IntersectionObserver: reveals stay one-time. */
+(function () {
+  "use strict";
+  var forceMotion = false;
+  try { forceMotion = localStorage.getItem("portfolio-motion") === "on"; } catch (e) { /* blocked */ }
+  if (!forceMotion && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (matchMedia("(max-width: 820px), (hover: none) and (pointer: coarse)").matches) return;
+  if (!("IntersectionObserver" in window)) return;
+
+  var secs = Array.prototype.slice.call(document.querySelectorAll(".snap-section"));
+  var sectionOf = new Map(), fadesOf = new Map();
+  secs.forEach(function (s) {
+    var list = Array.prototype.slice.call(s.querySelectorAll(".fade"));
+    fadesOf.set(s, list);
+    list.forEach(function (f) { sectionOf.set(f, s); });
+  });
+
+  /* tilt cards switch to a fast transition after their reveal (see the first block); do the same after a replay */
+  function settleWhenDone(el) {
+    if (!el.classList.contains("tilt")) return;
+    function onEnd(e) {
+      if (e.target !== el || e.propertyName !== "transform" || !el.classList.contains("in")) return;
+      el.style.transitionDelay = "0s";
+      el.classList.add("settled");
+      el.removeEventListener("transitionend", onEnd);
+    }
+    el.addEventListener("transitionend", onEnd);
+  }
+
+  function hide(el) {
+    el.classList.remove("in", "settled");
+    el.style.transitionDelay = (el.dataset.d || 0) + "s";      // the original stagger (the tilt block had zeroed it)
+  }
+
+  /* reveal: any fade element that comes within 50px of the screen (same margin script.js uses) */
+  var reveal = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      var el = e.target;
+      if (!e.isIntersecting || el.classList.contains("in")) return;
+      var s = sectionOf.get(el);
+      if (!s || s.__cineGone !== false) return;                // only after a section has been reset and come back; the first reveal is script.js's
+      el.classList.add("in");
+      settleWhenDone(el);
+    });
+  }, { rootMargin: "50px" });
+
+  var heroEls = [".hero-head-wrap", ".portrait", ".hero-bottom"]
+    .map(function (q) { return document.querySelector(q); }).filter(Boolean);
+  function restart(el) {                                        // plays the stylesheet's animation again
+    el.style.animation = "none";
+    void el.offsetWidth;
+    el.style.animation = "";
+  }
+
+  /* gone: the section is completely off screen */
+  var gone = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      var s = e.target, list = fadesOf.get(s) || [];
+      if (!e.isIntersecting) {
+        if (s.__cineGone) return;
+        s.__cineGone = true;
+        list.forEach(hide);
+      } else if (s.__cineGone) {
+        s.__cineGone = false;
+        list.forEach(function (el) { reveal.unobserve(el); reveal.observe(el); });   // re-check right now
+        if (s.classList.contains("hero") && document.documentElement.classList.contains("cine-ready")) {
+          heroEls.forEach(restart);
+        }
+      }
+    });
+  }, { rootMargin: "-2px 0px -2px 0px" });
+
+  secs.forEach(function (s) {
+    s.__cineGone = null;                                       // null = never left yet
+    gone.observe(s);
+    (fadesOf.get(s) || []).forEach(function (el) { reveal.observe(el); });
+  });
 })();
