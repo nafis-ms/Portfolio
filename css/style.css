@@ -33,8 +33,14 @@ img {
 
 /* ===== Section-by-section scrolling ===== */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto; /* desktop: sections snap, no smooth scrolling */
   scroll-snap-type: y mandatory;
+}
+/* Mobile / touch keeps its smooth scrolling (same query as the snap-off rule in cinema.css) */
+@media (max-width: 820px), (hover: none) and (pointer: coarse) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 .snap-section {
   scroll-snap-align: start;

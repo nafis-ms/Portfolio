@@ -21,9 +21,9 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap"
       rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=11">
-    <link rel="stylesheet" href="css/cinema.css?v=11">
-    <link rel="stylesheet" href="css/feedback.css?v=11">
+    <link rel="stylesheet" href="css/style.css?v=12">
+    <link rel="stylesheet" href="css/cinema.css?v=14">
+    <link rel="stylesheet" href="css/feedback.css?v=12">
   </head>
   <body>
     <div class="cine-progress" id="cineProgress" aria-hidden="true"></div>
@@ -41,8 +41,9 @@
             <ul class="gnav-links" id="navLinks">
               <li><a href="#home">Home</a></li>
               <li><a href="#about">About</a></li>
-              <li><a href="#projects">Projects</a></li>
               <li hidden><a href="#skills">Skills</a></li>
+              <li><a href="#projects">Projects</a></li>
+              <li><a href="#feedback">Feedback</a></li>
               <li hidden><a href="#github">GitHub</a></li>
               <li hidden><a href="#social">Social</a></li>
               <li><a href="#contact">Contact</a></li>
@@ -158,6 +159,19 @@
           </div>
         </section>
 
+        <!-- SKILLS (3D spheres are drawn by skills.js from the admin-managed skills) -->
+        <section class="skills snap-section" id="skills" aria-label="Skills"
+          hidden>
+          <div class="skills-stage" id="skillsStage">
+            <h2 class="hero-heading orbit-title">Skills</h2>
+            <canvas class="skills-canvas" id="skillsCanvas" role="img"
+              aria-label="Skills"></canvas>
+            <!-- shown instead of the canvas if WebGL is unavailable -->
+            <ul class="skills-fallback" id="skillsFallback"></ul>
+          </div>
+          <ul class="sr-only" id="skillsList"></ul>
+        </section>
+
         <!-- PROJECTS -->
         <section class="projects snap-section" id="projects"
           aria-label="Projects">
@@ -178,88 +192,6 @@
             </div>
             <!-- project cards are inserted here by script.js (from the admin panel) -->
             <div class="orbit-items" id="orbitItems"></div>
-          </div>
-        </section>
-
-        <!-- SKILLS (3D spheres are drawn by skills.js from the admin-managed skills) -->
-        <section class="skills snap-section" id="skills" aria-label="Skills"
-          hidden>
-          <div class="skills-stage" id="skillsStage">
-            <h2 class="hero-heading orbit-title">Skills</h2>
-            <canvas class="skills-canvas" id="skillsCanvas" role="img"
-              aria-label="Skills"></canvas>
-            <!-- shown instead of the canvas if WebGL is unavailable -->
-            <ul class="skills-fallback" id="skillsFallback"></ul>
-          </div>
-          <ul class="sr-only" id="skillsList"></ul>
-        </section>
-
-        <!-- GITHUB (filled in by github.js). Set data-user to your GitHub username;
-             while it is still the placeholder, the section and its nav link stay hidden. -->
-        <section class="github snap-section" id="github" aria-label="GitHub"
-          data-user="nafis-ms" hidden>
-          <div class="gh-wrap">
-            <h2 class="hero-heading section-title gh-title fade" data-y="40"
-              data-d="0">GitHub</h2>
-            <article class="gh-card fade" data-y="30" data-d="0.15"
-              id="ghCard" aria-busy="true">
-              <header class="gh-head">
-                <span class="gh-brand">
-                  <svg viewBox="0 0 16 16" aria-hidden="true"><path
-                      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" /></svg>
-                  <b>GitHub Stack</b>
-                </span>
-                <a class="gh-view" id="ghLink" href="https://github.com/"
-                  target="_blank" rel="noopener noreferrer">View profile</a>
-              </header>
-
-              <div class="gh-top">
-                <div class="gh-profile">
-                  <img class="gh-avatar" id="ghAvatar" width="64" height="64"
-                    alt="" hidden>
-                  <div class="gh-id">
-                    <h3 id="ghName">Loading...</h3>
-                    <p class="gh-handle" id="ghHandle"></p>
-                    <p class="gh-bio" id="ghBio"></p>
-                  </div>
-                </div>
-                <dl class="gh-stats">
-                  <div><dt>Repos</dt><dd id="ghRepos">-</dd></div>
-                  <div><dt>Stars</dt><dd id="ghStars">-</dd></div>
-                  <div><dt>Followers</dt><dd id="ghFollowers">-</dd></div>
-                  <div><dt>Following</dt><dd id="ghFollowing">-</dd></div>
-                </dl>
-              </div>
-
-              <div class="gh-langs" id="ghLangs" hidden>
-                <h3 class="gh-sub">Top languages</h3>
-                <div class="gh-langbar" id="ghLangBar" role="img"></div>
-                <ul class="gh-langlist" id="ghLangList"></ul>
-              </div>
-
-              <div class="gh-activity" id="ghActivity" hidden>
-                <div class="gh-activity-head">
-                  <h3 class="gh-sub">Contributions activity</h3>
-                  <span class="gh-total" id="ghTotal"></span>
-                </div>
-                <div class="gh-scroll" id="ghScroll">
-                  <div class="gh-cal" id="ghCal" role="img">
-                    <span></span>
-                    <div class="gh-months" id="ghMonths" aria-hidden="true"></div>
-                    <div class="gh-days" aria-hidden="true">
-                      <span>Mon</span><span>Wed</span><span>Fri</span>
-                    </div>
-                    <div class="gh-grid" id="ghGrid" aria-hidden="true"></div>
-                  </div>
-                </div>
-                <div class="gh-legend" aria-hidden="true">
-                  <span>Less</span><i data-l="0"></i><i data-l="1"></i><i
-                    data-l="2"></i><i data-l="3"></i><i data-l="4"></i><span>More</span>
-                </div>
-              </div>
-
-              <p class="gh-msg" id="ghMsg" role="status"></p>
-            </article>
           </div>
         </section>
 
@@ -343,6 +275,75 @@
           </div>
         </section>
 
+        <!-- GITHUB (filled in by github.js). Set data-user to your GitHub username;
+             while it is still the placeholder, the section and its nav link stay hidden. -->
+        <section class="github snap-section" id="github" aria-label="GitHub"
+          data-user="nafis-ms" hidden>
+          <div class="gh-wrap">
+            <h2 class="hero-heading section-title gh-title fade" data-y="40"
+              data-d="0">GitHub</h2>
+            <article class="gh-card fade" data-y="30" data-d="0.15"
+              id="ghCard" aria-busy="true">
+              <header class="gh-head">
+                <span class="gh-brand">
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path
+                      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" /></svg>
+                  <b>GitHub Stack</b>
+                </span>
+                <a class="gh-view" id="ghLink" href="https://github.com/"
+                  target="_blank" rel="noopener noreferrer">View profile</a>
+              </header>
+
+              <div class="gh-top">
+                <div class="gh-profile">
+                  <img class="gh-avatar" id="ghAvatar" width="64" height="64"
+                    alt="" hidden>
+                  <div class="gh-id">
+                    <h3 id="ghName">Loading...</h3>
+                    <p class="gh-handle" id="ghHandle"></p>
+                    <p class="gh-bio" id="ghBio"></p>
+                  </div>
+                </div>
+                <dl class="gh-stats">
+                  <div><dt>Repos</dt><dd id="ghRepos">-</dd></div>
+                  <div><dt>Stars</dt><dd id="ghStars">-</dd></div>
+                  <div><dt>Followers</dt><dd id="ghFollowers">-</dd></div>
+                  <div><dt>Following</dt><dd id="ghFollowing">-</dd></div>
+                </dl>
+              </div>
+
+              <div class="gh-langs" id="ghLangs" hidden>
+                <h3 class="gh-sub">Top languages</h3>
+                <div class="gh-langbar" id="ghLangBar" role="img"></div>
+                <ul class="gh-langlist" id="ghLangList"></ul>
+              </div>
+
+              <div class="gh-activity" id="ghActivity" hidden>
+                <div class="gh-activity-head">
+                  <h3 class="gh-sub">Contributions activity</h3>
+                  <span class="gh-total" id="ghTotal"></span>
+                </div>
+                <div class="gh-scroll" id="ghScroll">
+                  <div class="gh-cal" id="ghCal" role="img">
+                    <span></span>
+                    <div class="gh-months" id="ghMonths" aria-hidden="true"></div>
+                    <div class="gh-days" aria-hidden="true">
+                      <span>Mon</span><span>Wed</span><span>Fri</span>
+                    </div>
+                    <div class="gh-grid" id="ghGrid" aria-hidden="true"></div>
+                  </div>
+                </div>
+                <div class="gh-legend" aria-hidden="true">
+                  <span>Less</span><i data-l="0"></i><i data-l="1"></i><i
+                    data-l="2"></i><i data-l="3"></i><i data-l="4"></i><span>More</span>
+                </div>
+              </div>
+
+              <p class="gh-msg" id="ghMsg" role="status"></p>
+            </article>
+          </div>
+        </section>
+
         <!-- SOCIAL: links come from the admin panel (Profile tab); the section stays hidden until one is set -->
         <section class="social snap-section" id="social" aria-label="Social" hidden>
           <div class="social-inner">
@@ -393,6 +394,6 @@
     <script src="js/github.js?v=11"></script>
     <script src="js/feedback.js?v=11"></script>
     <script src="js/profile.js?v=11"></script>
-    <script src="js/cinema.js?v=11"></script>
+    <script src="js/cinema.js?v=13"></script>
   </body>
 </html>

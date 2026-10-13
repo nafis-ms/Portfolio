@@ -234,3 +234,54 @@ html[data-theme="light"] .fx-status.error { color: #d12c2c; }
   .fx-progress { display: none; }
   .fx-check circle, .fx-check path { animation: none; stroke-dashoffset: 0; }
 }
+
+/* ===== Desktop only: the Feedback section fills exactly one screen =====
+ * The form and the slider share the height left under the heading; sizes scale with the
+ * window height, and anything that still does not fit scrolls inside its own card.
+ * Mobile / touch is not affected. */
+@media (min-width: 821px) and (hover: hover) {
+  .feedback {
+    height: 100vh;
+    height: 100svh;
+    min-height: 0;
+    padding: clamp(4.5rem, 10vh, 6rem) 1.5rem clamp(1rem, 3vh, 2.5rem);
+  }
+  .fx-wrap { height: 100%; gap: clamp(0.7rem, 2.2vh, 2rem); }
+  .fx-head { flex: none; gap: clamp(0.3rem, 1vh, 0.9rem); }
+  .fx-title { font-size: clamp(2.2rem, min(9vw, 9vh), 6.5rem); }
+  .fx-sub { font-size: clamp(0.85rem, 1.6vh, 1.1rem); line-height: 1.5; }
+  .fx-layout {
+    flex: 1;
+    min-height: 0;
+    grid-template-columns: 1fr 1fr;      /* stay side by side on narrow desktop windows too */
+    grid-template-rows: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+  .fx-card { min-height: 0; padding: clamp(0.9rem, 2.4vh, 2.2rem) clamp(1.2rem, 2.4vw, 2.2rem); }
+  .fx-card-title { font-size: clamp(1.05rem, 2.4vh, 1.35rem); margin-bottom: clamp(0.4rem, 1.2vh, 1.25rem); }
+
+  /* form */
+  .fx-form { gap: clamp(0.45rem, 1.5vh, 1.1rem); overflow-x: hidden; overflow-y: auto; scrollbar-width: thin; }
+  .fx-field { gap: 0.35rem; }
+  .fx-field input[type="text"], .fx-field textarea {
+    padding: clamp(0.5rem, 1.3vh, 0.8rem) 1rem;
+    font-size: clamp(0.9rem, 1.9vh, 1rem);
+  }
+  .fx-field textarea { min-height: 0; height: clamp(4.5rem, 15vh, 9rem); resize: none; }
+  .fx-stars svg { width: clamp(22px, 3.6vh, 30px); height: clamp(22px, 3.6vh, 30px); }
+  .fx-seg span { padding: clamp(0.35rem, 1vh, 0.55rem) 0.8rem; }
+  .fx-send { padding: clamp(0.65rem, 1.6vh, 0.95rem) 2.2rem; }
+
+  /* slider */
+  .fx-board { min-height: 0; }
+  .fx-quote-mark { font-size: clamp(6rem, 18vh, 11rem); }
+  .fx-show { min-height: 0; gap: clamp(0.6rem, 1.6vh, 1.2rem); }
+  .fx-slides { min-height: 0; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }
+  .fx-slides::-webkit-scrollbar { display: none; }
+  .fx-slide blockquote { font-size: clamp(0.95rem, 2.1vh, 1.3rem); line-height: 1.6; }
+}
+
+/* short desktop windows: drop the small intro lines so the cards keep their room */
+@media (min-width: 821px) and (hover: hover) and (max-height: 720px) {
+  .fx-eyebrow, .fx-sub { display: none; }
+}
