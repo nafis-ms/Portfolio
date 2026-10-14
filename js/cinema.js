@@ -234,6 +234,96 @@
     })(last);
   })();
 
+  /* ---------- Light Mode only: drifting glass bubbles + twinkling sparkles (the Light Mode partner of the dark "dust") ---------- */
+  (function lightBubbles() {
+    var cvs = make("canvas", "cine-bubbles"), g = cvs.getContext && cvs.getContext("2d");
+    if (!g) return;
+    body.appendChild(cvs);
+    var NB = fine ? 16 : 8, NS = fine ? 16 : 8, B = [], S = [], W = 0, H = 0, dpr = 1, on = false, i;
+    var COLS = ["56,189,248", "99,102,241", "45,212,191", "167,139,250"];     // sky, indigo, teal, violet
+    var sprites = COLS.map(function (col) {
+      var c = document.createElement("canvas"), x = c.getContext("2d");
+      c.width = c.height = 128;
+      var fill = x.createRadialGradient(46, 42, 4, 64, 64, 62);                // soft glass body, lighter at the top-left
+      fill.addColorStop(0, "rgba(255,255,255,0.75)");
+      fill.addColorStop(0.3, "rgba(" + col + ",0.16)");
+      fill.addColorStop(0.85, "rgba(" + col + ",0.2)");
+      fill.addColorStop(1, "rgba(" + col + ",0.38)");
+      x.fillStyle = fill;
+      x.beginPath(); x.arc(64, 64, 60, 0, 6.2832); x.fill();
+      x.lineWidth = 2; x.strokeStyle = "rgba(" + col + ",0.55)";               // thin rim
+      x.beginPath(); x.arc(64, 64, 60, 0, 6.2832); x.stroke();
+      x.fillStyle = "rgba(255,255,255,0.9)";                                   // little highlight
+      x.beginPath(); x.ellipse(44, 38, 12, 6, -0.6, 0, 6.2832); x.fill();
+      return c;
+    });
+    for (i = 0; i < NB; i++) {
+      B.push({ x: Math.random(), y: Math.random(), r: 10 + Math.random() * 30, d: 0.3 + Math.random() * 0.7,
+               v: 5 + Math.random() * 12, c: i % COLS.length, f: 0.12 + Math.random() * 0.25,
+               ph: Math.random() * 6.283, a: 0.45 + Math.random() * 0.4 });
+    }
+    for (i = 0; i < NS; i++) {
+      S.push({ x: Math.random(), y: Math.random(), r: 3 + Math.random() * 5, tw: 0.8 + Math.random() * 1.6,
+               ph: Math.random() * 6.283, d: 0.2 + Math.random() * 0.6 });
+    }
+    function size() {
+      dpr = Math.min(1.5, window.devicePixelRatio || 1);
+      W = innerWidth; H = innerHeight;
+      cvs.width = Math.round(W * dpr);
+      cvs.height = Math.round(H * dpr);
+    }
+    size();
+    addEventListener("resize", size);
+
+    var last = performance.now(), t = 0;
+    (function frame(now) {
+      requestAnimationFrame(frame);
+      if (document.hidden) { last = now; return; }
+      if (!isLight()) {                                   // Dark Mode: draw nothing (the canvas is hidden by CSS too)
+        if (on) { g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cvs.width, cvs.height); on = false; }
+        last = now; return;
+      }
+      on = true;
+      if (now - last < 30) return;                        // ~30 fps is plenty for slow movement
+      var dt = Math.min(0.05, (now - last) / 1000 || 0);
+      last = now; t += dt;
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.clearRect(0, 0, W, H);
+      var sy = scrollY, k, p;
+      for (k = 0; k < NB; k++) {                          // bubbles rise slowly, sway, and drift with the scroll
+        p = B[k];
+        var span = H + p.r * 4;
+        var yy = H + p.r * 2 - (((p.y * span + p.v * t + sy * p.d * 0.1) % span) + span) % span;
+        var xx = p.x * W + Math.sin(t * p.f + p.ph) * 34 * p.d;
+        var d = p.r * 2 * (1 + 0.04 * Math.sin(t * 0.9 + p.ph));
+        g.globalAlpha = p.a;
+        g.drawImage(sprites[p.c], xx - d / 2, yy - d / 2, d, d);
+      }
+      g.lineCap = "round";
+      for (k = 0; k < NS; k++) {                          // four-point sparkles that fade in and out
+        p = S[k];
+        var tw = Math.max(0, Math.sin(t * p.tw + p.ph));
+        if (tw < 0.05) continue;
+        var sx = p.x * W + Math.sin(t * 0.2 + p.ph) * 10;
+        var sy2 = (((p.y * H - sy * p.d * 0.06) % H) + H) % H;
+        var L = p.r * (0.5 + tw);
+        g.globalAlpha = 0.85 * tw;
+        g.strokeStyle = "rgb(14,165,233)";
+        g.lineWidth = 1.4;
+        g.beginPath();
+        g.moveTo(sx - L, sy2); g.lineTo(sx + L, sy2);
+        g.moveTo(sx, sy2 - L); g.lineTo(sx, sy2 + L);
+        g.stroke();
+        g.lineWidth = 1;
+        g.beginPath();
+        g.moveTo(sx - L * 0.45, sy2 - L * 0.45); g.lineTo(sx + L * 0.45, sy2 + L * 0.45);
+        g.moveTo(sx - L * 0.45, sy2 + L * 0.45); g.lineTo(sx + L * 0.45, sy2 - L * 0.45);
+        g.stroke();
+      }
+      g.globalAlpha = 1;
+    })(last);
+  })();
+
   /* ---------- custom cursor (solid dot -> translucent ring on hover) + magnetic buttons (mouse only) ---------- */
   (function pointerFx() {
     if (!fine) return;
