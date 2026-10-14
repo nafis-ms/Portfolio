@@ -38,6 +38,7 @@
   var texKeys = {};              // id -> what the current texture was made from
   var aspect = 1.6;
   var running = false, visible = false, raf = 0, last = 0;
+  var parked = false, entranceDone = false;   // entrance: spheres wait off-screen, then fall in from the sides
   var ptr = { x: 0, y: 0, vx: 0, vy: 0, on: false, t: 0 };
 
   /* ---------- data ---------- */
@@ -144,6 +145,7 @@
     layout();
     items.forEach(updateTexture);
     if (reduce) world.settle(8);
+    else if (!parked && !entranceDone) { world.enter(); parked = true; entranceDone = true; }   // spheres wait off-screen until the section is seen
     if (!running) draw();
     start();
   }
@@ -263,7 +265,14 @@
 
     var io = new IntersectionObserver(function (entries) {
       visible = entries[0].isIntersecting;
-      if (visible) { onResize(); start(); } else stop();   // no work while off-screen
+      if (visible) {
+        onResize();
+        if (parked) { world.release(); parked = false; }     // fly in from the left and right
+        start();
+      } else {
+        stop();                                              // no work while off-screen
+        if (!reduce && items.length) { world.enter(); parked = true; }   // ready to fly in again next time
+      }
     }, { rootMargin: "80px" });
     io.observe(section);
     cleanups.push(function () { io.disconnect(); });
