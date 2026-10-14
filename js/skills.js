@@ -36,7 +36,8 @@
   var renderer = null;
   var items = [];                // visible skills, in display order
   var texKeys = {};              // id -> what the current texture was made from
-  var aspect = 1.6;
+  var aspect = 1.6;              // aspect of the whole canvas (it spans the full screen width)
+  var playAspect = 1.6;          // aspect of the area the spheres live in (the stage, which is narrower on wide screens)
   var running = false, visible = false, raf = 0, last = 0;
   var parked = false, entranceDone = false;   // entrance: spheres wait off-screen, then fall in from the sides
   var ptr = { x: 0, y: 0, vx: 0, vy: 0, on: false, t: 0 };
@@ -102,12 +103,13 @@
 
   /* ---------- layout ---------- */
   function sphereRadius(n) {
-    var r = Math.sqrt((COVERAGE * 4 * aspect * EDGE * EDGE) / (Math.max(1, n) * Math.PI));
+    var r = Math.sqrt((COVERAGE * 4 * playAspect * EDGE * EDGE) / (Math.max(1, n) * Math.PI));
     return Math.max(MIN_RADIUS, Math.min(MAX_RADIUS, r));
   }
 
   function layout() {
-    world.resize(aspect * EDGE, EDGE);
+    playAspect = aspect * Math.min(1, (stage.clientWidth || 1) / (canvas.clientWidth || 1));
+    world.resize(playAspect * EDGE, EDGE, aspect);
     var base = sphereRadius(items.length);
     world.sync(items.map(function (it) { return { id: it.id, radius: base * SIZE_SCALE[it.size] }; }));
   }
