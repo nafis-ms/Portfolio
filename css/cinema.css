@@ -322,17 +322,20 @@ html[data-theme="light"] .cine-vignette {
 }
 html[data-theme="light"] .cine-dust { mix-blend-mode: normal; opacity: 0.7; }
 
-/* ---------- Light Mode: drifting glass bubbles + sparkles (drawn by the lightBubbles block in js/cinema.js) ---------- */
-.cine-bubbles {
+/* ---------- Light Mode: soft aurora (drawn by the lightAurora block in js/cinema.js) ----------
+   It sits BEHIND the page (z-index -1, above only the <html> colour), so in Light Mode the page layers
+   are made see-through. Dark Mode keeps its solid #0c0c0c, which simply covers the canvas. */
+.cine-aurora {
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 7000;
+  z-index: -1;
   pointer-events: none;
-  display: none;
 }
-html[data-theme="light"] .cine-bubbles { display: block; }
+html[data-theme="light"] body,
+html[data-theme="light"] #root,
+html[data-theme="light"] .main { background: transparent; }
 
 /* ---------- custom cursor: solid dot, morphs into a translucent ring over clickable things; colour follows the theme ---------- */
 .cine-cursor {
