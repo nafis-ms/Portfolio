@@ -22,7 +22,7 @@
       href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap"
       rel="stylesheet">
     <link rel="stylesheet" href="css/style.css?v=12">
-    <link rel="stylesheet" href="css/cinema.css?v=22">
+    <link rel="stylesheet" href="css/cinema.css?v=24">
     <link rel="stylesheet" href="css/feedback.css?v=11">
   </head>
   <body>
@@ -177,6 +177,18 @@
             </div>
             <!-- project cards are inserted here by script.js (from the admin panel) -->
             <div class="orbit-items" id="orbitItems"></div>
+          </div>
+
+          <!-- "All Projects" button (bottom right) -> full-screen glass gallery below (js/projects-all.js). Hidden until a project exists. -->
+          <div class="pj-dock" id="pjDock" hidden>
+            <button class="pj-btn" id="pjOpen" type="button" aria-haspopup="dialog"
+              aria-controls="pjModal" aria-expanded="false">
+              <span class="pj-aura" aria-hidden="true"></span>
+              <span class="pj-glass" aria-hidden="true"></span>
+              <span class="pj-ico" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="pj-copy"><b class="pj-name">All Projects</b><small class="pj-count" id="pjCount"></small></span>
+              <span class="pj-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </button>
           </div>
         </section>
 
@@ -432,6 +444,27 @@
       </section>
     </div>
 
+    <!-- ALL PROJECTS GALLERY: a full-screen frosted-glass layer. Cards are built by js/projects-all.js from the admin's projects. -->
+    <div class="pj-modal" id="pjModal" hidden>
+      <span class="pj-ring" aria-hidden="true"></span>
+      <div class="pj-backdrop" data-close></div>
+      <section class="pj-panel" role="dialog" aria-modal="true" aria-labelledby="pjTitle" tabindex="-1">
+        <header class="pj-head">
+          <div class="pj-head-text">
+            <p class="pj-eyebrow">Selected work</p>
+            <h3 class="pj-title" id="pjTitle">Projects</h3>
+          </div>
+          <span class="pj-chip" id="pjChip"></span>
+          <button class="pj-close" type="button" data-close id="pjClose" aria-label="Close all projects">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </header>
+        <div class="pj-scroll" id="pjScroll" tabindex="0" aria-label="All projects">
+          <ul class="pj-grid" id="pjGrid"></ul>
+        </div>
+      </section>
+    </div>
+
     <script src="js/theme.js?v=11"></script>
     <script src="js/loader.js?v=11"></script>
     <script src="/api/index?p=content"></script>
@@ -441,6 +474,7 @@
     <script src="js/skills-physics.js?v=11"></script>
     <script src="js/skills-render.js?v=11"></script>
     <script src="js/skills.js?v=12"></script>
+    <script src="js/projects-all.js?v=1"></script>
     <script src="js/github.js?v=11"></script>
     <script src="js/feedback.js?v=11"></script>
     <script src="js/profile.js?v=11"></script>
