@@ -8,8 +8,8 @@
  *   heatmap:          github-contributions-api.jogruber.de (GitHub has no public
  *                     REST endpoint for the contribution calendar). If it is down,
  *                     the heatmap falls back to your recent public events.
- * Results are cached for 30 minutes so the 60 requests/hour unauthenticated
- * GitHub limit is never an issue. */
+ * Results are cached for 5 minutes so the data stays fresh while the 60 requests/hour
+ * unauthenticated GitHub limit is still never an issue. */
 (function () {
   "use strict";
 
@@ -21,7 +21,7 @@
   var API = "https://api.github.com";
   var CONTRIB_API = "https://github-contributions-api.jogruber.de/v4/";
   var CACHE_KEY = "portfolio-github-" + user.toLowerCase();
-  var TTL = 30 * 60 * 1000;
+  var TTL = 5 * 60 * 1000;
   var WEEKS = 53;
 
   var $ = function (id) { return document.getElementById(id); };

@@ -1331,6 +1331,19 @@ html[data-theme="light"] .pj-ico { background: linear-gradient(145deg, rgb(var(-
 .pj-btn:hover .pj-go { background: linear-gradient(135deg, rgb(var(--pj-a)), rgb(var(--pj-b))); border-color: transparent; color: #fff; box-shadow: 0 8px 20px -6px rgb(var(--pj-b) / 0.9); }
 .pj-btn:hover .pj-go svg { transform: rotate(-45deg); }
 
+/* Dark theme: the capsule uses the same dark surface and indigo/magenta accents as the rest of the dark site */
+html:not([data-theme="light"]) .pj-glass {
+  background: linear-gradient(135deg, rgba(30, 30, 38, 0.82), rgba(14, 14, 18, 0.78));
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), inset 0 -10px 18px rgba(0, 0, 0, 0.25), 0 22px 44px -18px rgba(0, 0, 0, 0.85);
+}
+html:not([data-theme="light"]) .pj-glass::before { background: radial-gradient(130px circle at var(--mx, 50%) var(--my, 50%), rgb(var(--pj-a) / 0.28), transparent 70%); }
+html:not([data-theme="light"]) .pj-glass::after { background: linear-gradient(110deg, transparent 38%, rgba(255, 255, 255, 0.1) 50%, transparent 62%); }
+html:not([data-theme="light"]) .pj-aura { opacity: 0.22; }
+html:not([data-theme="light"]) .pj-btn:hover .pj-aura { opacity: 0.55; }
+html:not([data-theme="light"]) .pj-ico { background: linear-gradient(145deg, #5548e6, #b600a8); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 8px 18px -8px rgba(182, 0, 168, 0.7); }
+html:not([data-theme="light"]) .pj-go { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.12); }
+
 html.cine-fx .projects:not(.cine-seen) .pj-dock { opacity: 0; }
 html.cine-fx .projects.cine-seen .pj-btn { animation: pj-reveal 1.6s var(--cine-ease) 1.2s backwards; }
 @keyframes pj-reveal {
@@ -1353,19 +1366,19 @@ html.cine-fx .projects.cine-seen .pj-btn { animation: pj-reveal 1.6s var(--cine-
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 18% 8%, rgb(var(--pj-a) / 0.22), transparent 55%),
-    radial-gradient(ellipse at 85% 92%, rgb(var(--pj-b) / 0.2), transparent 55%),
-    rgba(8, 7, 16, 0.38);
-  -webkit-backdrop-filter: blur(26px) saturate(1.5) brightness(0.85);
-  backdrop-filter: blur(26px) saturate(1.5) brightness(0.85);
+    radial-gradient(ellipse at 18% 8%, rgb(var(--pj-a) / 0.14), transparent 55%),
+    radial-gradient(ellipse at 85% 92%, rgb(var(--pj-b) / 0.12), transparent 55%),
+    rgba(8, 7, 16, 0.14);                /* mostly transparent tint: the page shows through the glass */
+  -webkit-backdrop-filter: blur(40px) saturate(1.5);
+  backdrop-filter: blur(40px) saturate(1.5);
 }
 html[data-theme="light"] .pj-backdrop {
   background:
-    radial-gradient(ellipse at 18% 8%, rgb(var(--pj-a) / 0.28), transparent 55%),
-    radial-gradient(ellipse at 85% 92%, rgb(var(--pj-c) / 0.18), transparent 55%),
-    rgba(240, 246, 255, 0.5);
-  -webkit-backdrop-filter: blur(26px) saturate(1.6) brightness(1.04);
-  backdrop-filter: blur(26px) saturate(1.6) brightness(1.04);
+    radial-gradient(ellipse at 18% 8%, rgb(var(--pj-a) / 0.16), transparent 55%),
+    radial-gradient(ellipse at 85% 92%, rgb(var(--pj-c) / 0.1), transparent 55%),
+    rgba(240, 246, 255, 0.18);
+  -webkit-backdrop-filter: blur(40px) saturate(1.6);
+  backdrop-filter: blur(40px) saturate(1.6);
 }
 .pj-backdrop::after {                   /* thin glass edge light around the whole screen */
   content: "";

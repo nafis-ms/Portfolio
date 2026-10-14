@@ -279,6 +279,14 @@ html {
   right: 3%;
 }
 
+/* Mobile: hide the moon and lego decorations in the About section */
+@media (max-width: 640px){
+  .about .deco.moon,
+  .about .deco.lego {
+    display: none !important;
+  }
+}
+
 /* Contact */
 .contact {
   min-height: 100vh;
