@@ -171,6 +171,8 @@
     playRing();
   }
   document.addEventListener("admin:start", replay);
+  /* the film opening (admin-cinema.js) holds the UI back; play its entrance once the curtain opens */
+  document.addEventListener("cine:ready", function () { var app = $("#app"); if (app && !app.hidden) replay(); });
 
   /* ---------- pointer spotlight on cards + wallpaper parallax ---------- */
   var raf = 0, px = 0, py = 0, tgt = null;
