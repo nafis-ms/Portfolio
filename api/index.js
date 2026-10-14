@@ -37,7 +37,7 @@ const DEFAULTS = {
   skills: [],      /* [{id, name, logo, category, size, percent (0-100 or null), visible}] in display order */
   cv: null         /* {name, url} */
 };
-const MAX_PROJECTS = 24, MAX_SKILLS = 40, MAX_FEEDBACK = 1000, SLIDER_MAX = 300;
+const MAX_PROJECTS = 24, MAX_SKILLS = 40, MAX_FEEDBACK = 1000, SLIDER_MAX = 1000;
 
 const S = (v, n) => typeof v === "string" ? v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim().slice(0, n) : "";
 const newId = () => Date.now().toString(36) + crypto.randomBytes(3).toString("hex");

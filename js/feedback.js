@@ -3,7 +3,7 @@
 (function () {
   "use strict";
   var SLIDE_MS = 7000;
-  var MAX_LEN = 300;
+  var MAX_LEN = 1000;
   var RATE_KEY = "portfolio-feedback-sent";
   var SEND_LIMIT = 5, SEND_WINDOW = 3600 * 1000;      // at most 5 messages per hour from one browser
   var RATE_WORDS = ["", "Poor", "Fair", "Good", "Very good", "Excellent"];

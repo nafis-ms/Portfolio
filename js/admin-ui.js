@@ -1,5 +1,5 @@
-/* Admin shell (macOS style): sidebar tabs with a sliding highlight, window controls,
- * menu-bar clock, dashboard numbers and the connection check.
+/* Admin shell: floating icon rail with a sliding highlight, live clock + calendar + day ring on the
+ * Dashboard, pointer spotlight and parallax, dashboard numbers and the connection check.
  * Pure layout; all the real work is done by the other admin-*.js files. */
 (function () {
   "use strict";
@@ -37,7 +37,7 @@
         void p.offsetWidth;                              // restart the entrance animation
         p.classList.add("tab-enter");
         clearTimeout(enterTimer);
-        enterTimer = setTimeout(function () { p.classList.remove("tab-enter"); }, 1400);
+        enterTimer = setTimeout(function () { p.classList.remove("tab-enter"); }, 2600);
       }
     });
     tabs.forEach(function (t) {
@@ -76,28 +76,120 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(moveHl);
   setTimeout(moveHl, 400); setTimeout(moveHl, 1200);    // after the window-open animation
 
-  /* ---------- window controls ---------- */
-  function toggleSide() { if (win) win.classList.toggle("side-hidden"); setTimeout(moveHl, 650); }
-  var tlMin = $("#tlMin"), tlZoom = $("#tlZoom"), tlClose = $("#tlClose"), sideToggle = $("#sideToggle");
-  if (tlMin) tlMin.addEventListener("click", toggleSide);
+  /* ---------- sidebar show / hide ---------- */
+  function toggleSide() { if (win) win.classList.toggle("side-hidden"); setTimeout(moveHl, 750); }
+  var sideToggle = $("#sideToggle");
   if (sideToggle) sideToggle.addEventListener("click", toggleSide);
-  if (tlZoom) tlZoom.addEventListener("click", function () { if (win) win.classList.toggle("zoomed"); setTimeout(moveHl, 650); });
-  if (tlClose) tlClose.addEventListener("click", function () { var b = $("#logout"); if (b) b.click(); });
 
-  /* ---------- menu-bar clock + greeting ---------- */
+  /* ---------- live clock, greeting, day ring ---------- */
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  var shown = { h: "", m: "" };
+  function roll(el, text, key) {
+    if (!el || shown[key] === text) return;
+    var first = shown[key] === "";
+    shown[key] = text;
+    el.textContent = text;
+    if (!first && !calm) { el.classList.remove("tick"); void el.offsetWidth; el.classList.add("tick"); }
+  }
+  var RING = 364.42;
   function tick() {
     var d = new Date();
     var c = $("#mbClock");
     if (c) c.textContent = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) +
       "  " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+
+    var h = d.getHours();
+    roll($("#clkH"), pad(h % 12 || 12), "h");
+    roll($("#clkM"), pad(d.getMinutes()), "m");
+    var ap = $("#clkAp"); if (ap) ap.textContent = h < 12 ? "AM" : "PM";
+    var dt = $("#clkDate");
+    if (dt) dt.textContent = d.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    var bar = $("#clkBar"); if (bar) bar.style.width = ((d.getSeconds() + d.getMilliseconds() / 1000) / 60 * 100).toFixed(1) + "%";
+
+    var start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    var pct = Math.min(1, (d.getTime() - start) / 86400000);
+    var pt = $("#ringPct"); if (pt) pt.textContent = Math.floor(pct * 100) + "%";
+    var left = Math.max(0, 86400000 - (d.getTime() - start)), lh = Math.floor(left / 3600000), lm = Math.floor(left % 3600000 / 60000);
+    var rl = $("#ringLeft"); if (rl) rl.textContent = lh + "h " + lm + "m left today";
+    if (ringOn) { var fg = $("#ringFg"); if (fg) fg.style.strokeDashoffset = (RING * (1 - pct)).toFixed(2); }
+
+    var word = $("#dashHelloWord");
+    if (word) word.textContent = (h < 5 ? "Working late," : h < 12 ? "Good Morning," : h < 18 ? "Good Afternoon," : "Good Evening,");
+    if (d.getDate() !== lastDay) { lastDay = d.getDate(); renderCal(false); }
   }
-  tick(); setInterval(tick, 20000);
-  var g = $("#dashGreeting");
-  if (g) {
-    var h = new Date().getHours();
-    var hello = h < 5 ? "Working late" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
-    g.textContent = hello + ". Everything you change here is saved on the server and goes live on your site within a few seconds.";
+  var ringOn = false, lastDay = -1, ringTimer = 0;
+  function playRing() {                                   // sweep the ring in again whenever the Dashboard opens
+    var fg = $("#ringFg"); if (!fg) return;
+    ringOn = false; fg.style.strokeDashoffset = RING;
+    clearTimeout(ringTimer);
+    ringTimer = setTimeout(function () { ringOn = true; tick(); }, calm ? 0 : 700);
   }
+
+  /* ---------- calendar ---------- */
+  var calDate = new Date(); calDate.setDate(1);
+  var calDays = $("#calDays"), calTitle = $("#calTitle");
+  function renderCal(animate) {
+    if (!calDays || !calTitle) return;
+    function paint() {
+      var now = new Date(), y = calDate.getFullYear(), m = calDate.getMonth();
+      calTitle.textContent = calDate.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+      var firstDow = new Date(y, m, 1).getDay(), inMonth = new Date(y, m + 1, 0).getDate(), prevDays = new Date(y, m, 0).getDate();
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < 42; i++) {
+        var cell = document.createElement("span"), n = i - firstDow + 1;
+        if (n < 1) { cell.textContent = prevDays + n; cell.className = "out"; }
+        else if (n > inMonth) { cell.textContent = n - inMonth; cell.className = "out"; }
+        else {
+          cell.textContent = n;
+          if (n === now.getDate() && m === now.getMonth() && y === now.getFullYear()) { cell.className = "today"; cell.setAttribute("aria-current", "date"); }
+        }
+        frag.appendChild(cell);
+      }
+      calDays.textContent = ""; calDays.appendChild(frag);
+    }
+    if (animate && !calm) {
+      calDays.classList.add("flip");
+      setTimeout(function () { paint(); calDays.classList.remove("flip"); }, 180);
+    } else paint();
+  }
+  function shiftMonth(by) { calDate.setMonth(calDate.getMonth() + by); renderCal(true); }
+  var cp = $("#calPrev"), cn = $("#calNext");
+  if (cp) cp.addEventListener("click", function () { shiftMonth(-1); });
+  if (cn) cn.addEventListener("click", function () { shiftMonth(1); });
+  if (calTitle) calTitle.addEventListener("click", function () { calDate = new Date(); calDate.setDate(1); renderCal(true); });
+  renderCal(false);
+  tick(); setInterval(tick, 1000);
+
+  /* ---------- replay the entrance when the panel opens after sign-in ---------- */
+  function replay() {
+    var p = panels.filter(function (x) { return !x.hidden; })[0];
+    if (p && !calm) {
+      p.classList.remove("tab-enter"); void p.offsetWidth; p.classList.add("tab-enter");
+      clearTimeout(enterTimer);
+      enterTimer = setTimeout(function () { p.classList.remove("tab-enter"); }, 2600);
+    }
+    playRing();
+  }
+  document.addEventListener("admin:start", replay);
+
+  /* ---------- pointer spotlight on cards + wallpaper parallax ---------- */
+  var raf = 0, px = 0, py = 0, tgt = null;
+  document.addEventListener("pointermove", function (e) {
+    px = e.clientX; py = e.clientY; tgt = e.target;
+    if (raf || calm) return;
+    raf = requestAnimationFrame(function () {
+      raf = 0;
+      var root = document.documentElement;
+      root.style.setProperty("--px", ((px / innerWidth) * 2 - 1).toFixed(3));
+      root.style.setProperty("--py", ((py / innerHeight) * 2 - 1).toFixed(3));
+      var card = tgt && tgt.closest ? tgt.closest(".panel, .stat") : null;
+      if (card) {
+        var r = card.getBoundingClientRect();
+        card.style.setProperty("--mx", (px - r.left) + "px");
+        card.style.setProperty("--my", (py - r.top) + "px");
+      }
+    });
+  }, { passive: true });
 
   /* ---------- numbers ---------- */
   function count(el, n) {

@@ -6,7 +6,7 @@
   var S = window.FBStore;
   var $ = function (s) { return document.querySelector(s); };
   if (!S || !window.ADMIN || !$("#fbaForm")) return;
-  var SLIDER_MAX = 300;
+  var SLIDER_MAX = 1000;
   var tab = "pending", editingId = null, cache = [], busy = false, poll = null;
 
   function say(el, text, kind) { el.textContent = text || ""; el.className = "msg" + (kind ? " " + kind : ""); }
