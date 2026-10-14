@@ -1159,13 +1159,63 @@ html[data-theme="light"] .sk-track { background: rgba(20, 24, 40, 0.05); box-sha
   .sk-btn, .sk-label-line { transition: none; }
 }
 
+/* ---------- phones: smaller "All Skills" button + a popup that fits the screen ---------- */
 @media (max-width: 640px) {
-  .sk-dock { right: 0.9rem; bottom: 0.9rem; }
-  .sk-label-text { letter-spacing: 0.26em; margin-right: -0.26em; }
-  .sk-card { border-radius: 22px; }
-  .sk-head { padding: 0 2.2rem; }
-  .sk-ico { width: 38px; height: 38px; border-radius: 12px; }
+  .sk-dock {
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
+    bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.6rem;
+  }
+  .sk-label { gap: 0.35rem; }
+  .sk-label-text { font-size: 0.66rem; letter-spacing: 0.22em; margin-right: -0.22em; }
+  .sk-btn { width: 46px; }
+  .sk-btn-core { inset: 3px; }
+  .sk-btn-ring { padding: 1.25px; }
+  .sk-bars { height: 16px; gap: 2.5px; }
+  .sk-bars i { width: 3px; }
+
+  .sk-modal { padding: 0.75rem; }
+  .sk-card {
+    max-height: 86vh;
+    max-height: 86dvh;
+    padding: 1.25rem 1rem 0.9rem;
+    border-radius: 22px;
+  }
+  .sk-close { top: 0.7rem; right: 0.7rem; width: 36px; height: 36px; }
+  .sk-close svg { width: 14px; height: 14px; }
+  .sk-head { gap: 0.4rem; padding: 0 2.2rem; }
+  .sk-eyebrow { font-size: 0.62rem; letter-spacing: 0.24em; gap: 0.5rem; }
+  .sk-eyebrow::before, .sk-eyebrow::after { width: 18px; }
+  .sk-title { font-size: 1.75rem; }
+  .sk-list { gap: 0.95rem; margin-top: 0.7rem; padding: 0.9rem 0.5rem; -webkit-overflow-scrolling: touch; }
+  .sk-row { column-gap: 0.7rem; row-gap: 0.45rem; }
+  .sk-ico { width: 36px; height: 36px; border-radius: 11px; }
+  .sk-name { font-size: 0.92rem; }
   .sk-name small { display: none; }
+  .sk-pct { font-size: 0.9rem; }
+  .sk-track { height: 8px; }
+  .sk-foot { padding-top: 0.7rem; font-size: 0.64rem; }
+}
+@media (max-width: 380px) {
+  .sk-label-text { font-size: 0.6rem; letter-spacing: 0.18em; margin-right: -0.18em; }
+  .sk-btn { width: 42px; }
+  .sk-bars { height: 14px; }
+  .sk-title { font-size: 1.55rem; }
+}
+/* phones held sideways: very little height, so shrink the popup */
+@media (max-height: 500px) and (max-width: 940px) {
+  .sk-dock { bottom: 0.6rem; }
+  .sk-btn { width: 42px; }
+  .sk-modal { padding: 0.5rem; }
+  .sk-card { max-height: 94vh; max-height: 94dvh; padding-top: 0.9rem; }
+  .sk-title { font-size: 1.45rem; }
+  .sk-head { gap: 0.25rem; }
+  .sk-list { gap: 0.7rem; }
+}
+/* touch screens have no hover: stop the "hover" scale sticking after a tap */
+@media (hover: none) {
+  .sk-btn:hover { transform: none; }
+  .sk-btn:hover .sk-btn-core { filter: none; }
 }
 
 
@@ -1612,12 +1662,64 @@ html[data-theme="light"] .pj-card::after { background: radial-gradient(260px cir
   .pj-btn, .pj-ico i, .pj-go svg { transition: none; }
 }
 
+/* ---------- phones: smaller "All Projects" capsule + a gallery that fits the screen ---------- */
 @media (max-width: 640px) {
-  .pj-dock { right: 0.9rem; bottom: 0.9rem; }
-  .pj-btn { height: 56px; gap: 0.7rem; }
-  .pj-ico { width: 40px; height: 40px; border-radius: 13px; }
-  .pj-go { width: 34px; height: 34px; }
+  .pj-dock {
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
+    bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  }
+  .pj-btn { height: 48px; gap: 0.55rem; padding: 0 0.45rem; }
+  .pj-aura { inset: -3px; filter: blur(10px); }
+  .pj-ico { width: 36px; height: 36px; border-radius: 12px; }
+  .pj-ico i { width: 16px; height: 21px; margin: -10px 0 0 -8px; border-radius: 4px; }
+  .pj-ico i::after { left: 2.5px; right: 2.5px; top: 3px; height: 6px; }
+  .pj-copy { gap: 0.18rem; }
+  .pj-name { font-size: 0.84rem; letter-spacing: 0.02em; }
+  .pj-count { font-size: 0.55rem; letter-spacing: 0.18em; }
+  .pj-go { width: 30px; height: 30px; margin-left: 0; }
+  .pj-go svg { width: 14px; height: 14px; }
+
   .pj-chip { display: none; }
-  .pj-grid { grid-template-columns: 1fr; }
+  .pj-panel { padding: 4.4rem 0.9rem 0; }
+  .pj-head { gap: 0.7rem; padding-bottom: 0.7rem; }
+  .pj-head-text { gap: 0.4rem; }
+  .pj-eyebrow { font-size: 0.62rem; letter-spacing: 0.22em; gap: 0.5rem; }
+  .pj-eyebrow::before { width: 22px; }
+  .pj-title { font-size: clamp(2rem, 11vw, 2.6rem); }
+  .pj-close { width: 40px; height: 40px; }
+  .pj-close svg { width: 16px; height: 16px; }
+  .pj-scroll { padding: 0.9rem 0.6rem calc(2.5rem + env(safe-area-inset-bottom, 0px)); -webkit-overflow-scrolling: touch; }
+  .pj-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .pj-card { border-radius: 18px; }
+  .pj-num { left: 0.7rem; top: 0.65rem; padding: 0.2rem 0.5rem; font-size: 0.62rem; }
+  .pj-info { padding: 0.8rem 0.95rem 0.95rem; }
+  .pj-t { font-size: 1rem; }
+  .pj-host { font-size: 0.74rem; }
   .pj-backdrop::after { inset: 6px; border-radius: 22px; }
+}
+@media (min-width: 480px) and (max-width: 640px) {
+  .pj-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 380px) {
+  .pj-btn { height: 44px; gap: 0.45rem; }
+  .pj-ico { width: 32px; height: 32px; border-radius: 10px; }
+  .pj-name { font-size: 0.78rem; }
+  .pj-go { width: 28px; height: 28px; }
+}
+/* phones held sideways */
+@media (max-height: 500px) and (max-width: 940px) {
+  .pj-dock { bottom: 0.6rem; }
+  .pj-btn { height: 44px; }
+  .pj-panel { padding-top: 3.6rem; }
+  .pj-title { font-size: 1.9rem; }
+  .pj-head { padding-bottom: 0.5rem; }
+  .pj-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+/* touch screens have no hover: stop the "hover" lift sticking after a tap, and show the visit tag always */
+@media (hover: none) {
+  .pj-btn:hover { transform: none; }
+  .pj-btn:hover .pj-aura { opacity: 0.5; inset: -5px; }
+  .pj-card:hover { translate: none; }
+  .pj-card:hover .pj-media img { transform: scale(1.02); filter: none; }
+  .pj-visit { opacity: 1; transform: none; padding: 0.22rem 0.6rem; font-size: 0.62rem; }
 }
