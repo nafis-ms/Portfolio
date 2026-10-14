@@ -1358,13 +1358,14 @@ html.cine-fx .projects.cine-seen .pj-btn { animation: pj-reveal 1.6s var(--cine-
   z-index: 9600;
   --ox: 90vw;
   --oy: 90vh;
-  clip-path: circle(0px at var(--ox) var(--oy));
-  transition: clip-path 0.9s cubic-bezier(0.76, 0, 0.24, 1);
 }
-.pj-modal.is-open { clip-path: circle(160vmax at var(--ox) var(--oy)); transition-duration: 1.35s; }
+/* The iris now sits on the backdrop itself. A clip-path on the parent made it a "backdrop root", which stopped
+   backdrop-filter from seeing the page behind it, so nothing was blurred. */
 .pj-backdrop {
   position: absolute;
   inset: 0;
+  clip-path: circle(0px at var(--ox) var(--oy));
+  transition: clip-path 0.9s cubic-bezier(0.76, 0, 0.24, 1);
   background:
     radial-gradient(ellipse at 18% 8%, rgb(var(--pj-a) / 0.14), transparent 55%),
     radial-gradient(ellipse at 85% 92%, rgb(var(--pj-b) / 0.12), transparent 55%),
@@ -1380,6 +1381,7 @@ html[data-theme="light"] .pj-backdrop {
   -webkit-backdrop-filter: blur(40px) saturate(1.6);
   backdrop-filter: blur(40px) saturate(1.6);
 }
+.pj-modal.is-open .pj-backdrop { clip-path: circle(160vmax at var(--ox) var(--oy)); transition-duration: 1.35s; }
 .pj-backdrop::after {                   /* thin glass edge light around the whole screen */
   content: "";
   position: absolute;
@@ -1418,7 +1420,11 @@ html[data-theme="light"] .pj-backdrop::after { border-color: rgba(255, 255, 255,
   padding: clamp(4.6rem, 10vh, 6rem) clamp(1rem, 3vw, 2.5rem) 0;   /* starts below the page's nav bar, which shows faintly through the glass */
   color: var(--pj-text);
   outline: none;
+  opacity: 0;
+  transform: translateY(26px) scale(0.985);
+  transition: opacity 0.5s ease, transform 0.7s var(--cine-ease);
 }
+.pj-modal.is-open .pj-panel { opacity: 1; transform: none; transition: opacity 0.9s ease 0.45s, transform 1.1s var(--cine-ease) 0.45s; }
 .pj-head { display: flex; align-items: flex-end; gap: 1.1rem; flex: none; padding-bottom: clamp(0.9rem, 2.4vh, 1.6rem); }
 .pj-head-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
 .pj-eyebrow {
