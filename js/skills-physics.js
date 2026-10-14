@@ -13,6 +13,7 @@
 
   // Tweak these to change how the cluster feels.
   var CONFIG = {
+    enterPull: 5,        // stronger pull while a sphere flies in from the side edge
     attraction: 1.6,     // pull toward the centre, in 1/s^2 (higher = tighter cluster)
     flatten: 7,          // extra pull on z so the cluster stays a shallow slab facing the camera
     drag: 0.9,           // air drag per second (higher = settles faster)
@@ -77,7 +78,8 @@
         qx: qx, qy: qy, qz: qz, qw: qw,
         wx: 0, wy: 0, wz: 0,
         p1: rand() * 6.283, p2: rand() * 6.283, p3: rand() * 6.283, p4: rand() * 6.283,
-        f1: 0.55 + rand() * 0.5, f2: 0.7 + rand() * 0.6
+        f1: 0.55 + rand() * 0.5, f2: 0.7 + rand() * 0.6,
+        hold: false, delay: 0, entering: false
       };
     }
 
@@ -103,11 +105,34 @@
       pointer.x = x; pointer.y = y; pointer.vx = vx; pointer.vy = vy; pointer.on = !!on;
     }
 
+    /* Entrance: enter() parks every sphere just outside the left / right edge (alternating sides);
+     * release() lets them go one after another, so the centre pulls them in like gravity. */
+    function enter() {
+      bodies.forEach(function (b, i) {
+        var side = i % 2 ? 1 : -1;
+        b.hold = true; b.entering = true; b.delay = 0;
+        b.x = side * (bounds.w + b.r + 0.2);
+        b.y = (rand() - 0.5) * bounds.h * 1.5;
+        b.z = 0; b.vx = 0; b.vy = 0; b.vz = 0; b.wx = 0; b.wy = 0; b.wz = 0;
+      });
+    }
+    function release() {
+      bodies.forEach(function (b, i) {
+        if (!b.hold) return;
+        b.hold = false;
+        b.delay = 0.1 + (i >> 1) * 0.13 + rand() * 0.08;
+        b.vx = b.x > 0 ? -0.8 : 0.8;
+      });
+    }
+
     function integrateBody(b, h) {
+      if (b.hold) return;
+      if (b.delay > 0) { b.delay -= h; if (b.delay > 0) return; }
       var t = time;
-      // Soft attraction toward the centre (no gravity, no floor)
-      var ax = -cfg.attraction * b.x;
-      var ay = -cfg.attraction * b.y;
+      // Soft attraction toward the centre (stronger while flying in from the edge)
+      var pull = b.entering ? cfg.enterPull : cfg.attraction;
+      var ax = -pull * b.x;
+      var ay = -pull * b.y;
       var az = -(cfg.attraction + cfg.flatten) * b.z;
 
       // Idle drift: each sphere wanders on its own slow rhythm
@@ -148,10 +173,13 @@
       var lx = bounds.w - b.r, ly = bounds.h - b.r;
       if (lx < 0) lx = 0;
       if (ly < 0) ly = 0;
-      if (b.x > lx) { b.x = lx; if (b.vx > 0) b.vx *= -0.4; }
-      else if (b.x < -lx) { b.x = -lx; if (b.vx < 0) b.vx *= -0.4; }
-      if (b.y > ly) { b.y = ly; if (b.vy > 0) b.vy *= -0.4; }
-      else if (b.y < -ly) { b.y = -ly; if (b.vy < 0) b.vy *= -0.4; }
+      if (b.entering && Math.abs(b.x) < lx) b.entering = false;     // it is on screen now
+      if (!b.entering) {
+        if (b.x > lx) { b.x = lx; if (b.vx > 0) b.vx *= -0.4; }
+        else if (b.x < -lx) { b.x = -lx; if (b.vx < 0) b.vx *= -0.4; }
+        if (b.y > ly) { b.y = ly; if (b.vy > 0) b.vy *= -0.4; }
+        else if (b.y < -ly) { b.y = -ly; if (b.vy < 0) b.vy *= -0.4; }
+      }
 
       // Rotation: damped, with gentle torques that keep the logo readable
       var qx = b.qx, qy = b.qy, qz = b.qz, qw = b.qw;
@@ -177,8 +205,10 @@
       var n = bodies.length;
       for (var i = 0; i < n; i++) {
         var a = bodies[i];
+        if (a.hold || a.delay > 0) continue;
         for (var j = i + 1; j < n; j++) {
           var b = bodies[j];
+          if (b.hold || b.delay > 0) continue;
           var dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
           var minD = a.r + b.r;
           var d2 = dx * dx + dy * dy + dz * dz;
@@ -235,6 +265,7 @@
       // Collision push-outs can nudge a sphere a hair past the edge: keep all inside
       for (var k = 0; k < bodies.length; k++) {
         var b = bodies[k];
+        if (b.entering || b.hold) continue;
         var lx = Math.max(0, bounds.w - b.r), ly = Math.max(0, bounds.h - b.r);
         if (b.x > lx) b.x = lx; else if (b.x < -lx) b.x = -lx;
         if (b.y > ly) b.y = ly; else if (b.y < -ly) b.y = -ly;
@@ -275,6 +306,8 @@
       bounds: bounds,
       get bodies() { return bodies; },
       sync: sync,
+      enter: enter,
+      release: release,
       resize: resize,
       setPointer: setPointer,
       step: step,
