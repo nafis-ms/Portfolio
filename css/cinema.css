@@ -1723,3 +1723,11 @@ html[data-theme="light"] .pj-card::after { background: radial-gradient(260px cir
   .pj-card:hover .pj-media img { transform: scale(1.02); filter: none; }
   .pj-visit { opacity: 1; transform: none; padding: 0.22rem 0.6rem; font-size: 0.62rem; }
 }
+
+/* "All Projects" button: no glow or shadow effects (coloured aura, drop shadows, inner highlights) */
+html .pj-btn .pj-aura { display: none; }
+html .pj-btn .pj-glass,
+html .pj-btn .pj-ico,
+html .pj-btn .pj-go,
+html .pj-btn:hover .pj-go { box-shadow: none; }
+html .pj-btn .pj-ico i { box-shadow: none; }
