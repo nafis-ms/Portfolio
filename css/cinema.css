@@ -616,6 +616,10 @@ html.cine-fx .social-card:nth-child(2) .social-ico { animation-delay: -2s; }
 html.cine-fx .projects:not(.cine-seen) .orbit-title,
 html.cine-fx .skills:not(.cine-seen) .orbit-title { opacity: 0; }
 html.cine-fx .projects:not(.cine-seen) .orbit-center { opacity: 0; }
+
+/* Skills: the canvas spans the full screen width so the spheres can fly in from the real left and right edges
+   (the spheres themselves still stay inside the normal stage area) */
+.skills-canvas { left: 50%; right: auto; width: 100vw; transform: translateX(-50%); }
 html.cine-fx .projects:not(.cine-seen) .orbit-card { filter: blur(14px) brightness(1.6); }
 
 html.cine-fx .projects.cine-seen .orbit-title,
