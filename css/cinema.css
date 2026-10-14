@@ -615,14 +615,12 @@ html.cine-fx .social-card:nth-child(2) .social-ico { animation-delay: -2s; }
 /* ----- 3. Projects: focus pull (blur to sharp) on the title, the character and each orbiting card ----- */
 html.cine-fx .projects:not(.cine-seen) .orbit-title,
 html.cine-fx .skills:not(.cine-seen) .orbit-title { opacity: 0; }
-html.cine-fx .projects:not(.cine-seen) .orbit-center,
-html.cine-fx .skills:not(.cine-seen) .skills-canvas { opacity: 0; }
+html.cine-fx .projects:not(.cine-seen) .orbit-center { opacity: 0; }
 html.cine-fx .projects:not(.cine-seen) .orbit-card { filter: blur(14px) brightness(1.6); }
 
 html.cine-fx .projects.cine-seen .orbit-title,
 html.cine-fx .skills.cine-seen .orbit-title { animation: cine3-title 1.8s var(--cine-ease) backwards; }
 html.cine-fx .projects.cine-seen .orbit-center { animation: cine3-focus 1.8s var(--cine-ease) 0.25s backwards; }
-html.cine-fx .skills.cine-seen .skills-canvas  { animation: cine3-focus 1.8s var(--cine-ease) 0.3s backwards; }
 html.cine-fx .projects.cine-seen .orbit-card   { animation: cine3-card 1.5s var(--cine-ease) backwards; }
 html.cine-fx .projects.cine-seen .orbit-card:nth-child(1) { animation-delay: 0.50s; }
 html.cine-fx .projects.cine-seen .orbit-card:nth-child(2) { animation-delay: 0.62s; }
