@@ -614,13 +614,16 @@ html[data-theme="light"] .cine-cursor { --cc-rgb: 14 165 233; }
 }
 .fb-live { position: absolute; right: -1px; bottom: -1px; width: 11px; height: 11px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 2px var(--rail); animation: pulse 2.4s ease-out infinite; }
 .fb-status .nl small { display: block; margin-top: 1px; font-size: 0.7rem; font-weight: 300; color: var(--muted); }
-@media (max-height: 760px) {
-  .navbtn { width: 44px; height: 44px; }
-  .side { gap: 4px; }
-  .side-foot { gap: 4px; padding-top: 8px; }
-  .side-foot .icon-btn { width: 38px; height: 38px; }
-  .fb-status { width: 38px; height: 38px; }
-  .fb-avatar { width: 32px; height: 32px; font-size: 0.82rem; }
+/* the rail scales with the window height, so the nav, status and footer buttons always fit inside it */
+@media (min-width: 861px) {
+  .sidebar { padding: clamp(6px, 1.4vh, 12px) 0; }
+  .side { gap: clamp(2px, 0.9vh, 8px); }
+  .navbtn { width: clamp(32px, 5.6vh, 50px); height: clamp(32px, 5.6vh, 50px); border-radius: clamp(10px, 1.8vh, 15px); }
+  .ni svg { width: clamp(17px, 2.6vh, 22px); height: clamp(17px, 2.6vh, 22px); }
+  .side-foot { gap: clamp(2px, 0.6vh, 6px); padding-top: clamp(6px, 1.2vh, 12px); }
+  .side-foot .icon-btn, .fb-status { width: clamp(30px, 4.8vh, 44px); height: clamp(30px, 4.8vh, 44px); border-radius: clamp(9px, 1.5vh, 14px); }
+  .side-foot .icon-btn svg { width: clamp(16px, 2.3vh, 20px); height: clamp(16px, 2.3vh, 20px); }
+  .fb-avatar { width: clamp(26px, 4.2vh, 38px); height: clamp(26px, 4.2vh, 38px); font-size: clamp(0.72rem, 1.7vh, 0.95rem); }
 }
 @media (max-width: 860px) {
   .side-foot { flex-direction: row; gap: 2px; }
