@@ -9,6 +9,7 @@
   var logo = "";           // an existing logo's URL, or a freshly chosen data URL
   var hadLogo = false;     // the skill being edited already has a logo on the server
   var busy = false;
+  var DEFAULT_LEVEL = { large: 90, medium: 70, small: 40 };   // same defaults as the site's All Skills popup
 
   function say(el, text, kind) {
     el.textContent = text || "";
@@ -42,7 +43,8 @@
       name.textContent = s.name;
       var sub = document.createElement("span");
       sub.className = "site";
-      sub.textContent = [s.category, cap(s.size || "medium"), s.visible === false ? "Hidden" : "Visible"]
+      var lvl = s.percent === null || s.percent === undefined ? DEFAULT_LEVEL[s.size] || 70 : s.percent;
+      sub.textContent = [s.category, cap(s.size || "medium"), lvl + "%" + (s.percent === null || s.percent === undefined ? " (default)" : ""), s.visible === false ? "Hidden" : "Visible"]
         .filter(Boolean).join(" · ");
       meta.append(name, sub);
 
@@ -80,7 +82,8 @@
     }, function (err) { say(msgEl, err.message, "error"); return false; });
   }
   function fields(s, over) {
-    var o = { name: s.name, category: s.category || "", size: s.size || "medium", visible: s.visible !== false };
+    var o = { name: s.name, category: s.category || "", size: s.size || "medium", visible: s.visible !== false,
+              percent: s.percent === null || s.percent === undefined ? "" : s.percent };
     for (var k in over) o[k] = over[k];
     return o;
   }
@@ -113,10 +116,16 @@
     $("#skillLogoClear").hidden = !logo;
   }
 
+  function updatePlaceholder() {                         // the empty box shows what the site will use
+    $("#skillPercent").placeholder = "Default " + (DEFAULT_LEVEL[$("#skillSize").value] || 70) + "%";
+  }
+  $("#skillSize").addEventListener("change", updatePlaceholder);
+
   function resetForm() {
     editingId = null;
     hadLogo = false;
     form.reset();
+    updatePlaceholder();
     setLogo("");
     $("#skillFormTitle").textContent = "Add a skill";
     $("#skillSave").textContent = "Add skill";
@@ -129,6 +138,8 @@
     $("#skillName").value = s.name;
     $("#skillCategory").value = s.category || "";
     $("#skillSize").value = s.size || "medium";
+    $("#skillPercent").value = s.percent === null || s.percent === undefined ? "" : s.percent;
+    updatePlaceholder();
     $("#skillVisible").checked = s.visible !== false;
     hadLogo = !!s.logo;
     setLogo(s.logo);
@@ -202,10 +213,15 @@
     if (!name) return say(msg, "Enter a skill name.", "error");
     if (name.length > 40) return say(msg, "Skill name must be 40 characters or fewer.", "error");
 
+    var rawPct = $("#skillPercent").value.trim().replace(/%$/, "").trim();
+    if (rawPct !== "" && (!/^\d{1,3}$/.test(rawPct) || Number(rawPct) > 100)) {
+      return say(msg, "Skill level must be a whole number from 0 to 100, or left empty.", "error");
+    }
     var entry = {
       name: name,
       category: $("#skillCategory").value.trim().slice(0, 40),
       size: $("#skillSize").value,
+      percent: rawPct === "" ? "" : Number(rawPct),          // "" = use the size default
       visible: $("#skillVisible").checked
     };
     if (logo.indexOf("data:") === 0) entry.logo = logo;             // only send a logo that was just chosen

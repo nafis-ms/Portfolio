@@ -1,5 +1,5 @@
 /* Cinematic extras: scroll progress bar, scroll parallax on the About decorations,
- * and 3D tilt + cursor spotlight on cards. Skipped for "reduce motion". */
+ * and 3D tilt + cursor spotlight on cards, and the custom cursor. Skipped for "reduce motion". */
 (function () {
   "use strict";
   var forceMotion = false;
@@ -233,11 +233,18 @@
     })(last);
   })();
 
-  /* ---------- cursor light + magnetic buttons (mouse only) ---------- */
+  /* ---------- custom cursor (solid dot -> translucent ring on hover) + magnetic buttons (mouse only) ---------- */
   (function pointerFx() {
     if (!fine) return;
-    var light = make("div", "cine-light");
-    body.appendChild(light);
+    var HOVER = 'a[href],button,[role="button"],[role="tab"],[role="link"],label,summary,select,[onclick],' +
+      '.orbit-card,.fx-seg,.fx-arrow,[data-cursor="hover"],input[type="checkbox"],input[type="radio"],input[type="range"]';
+    var TEXT = 'input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]),textarea,[contenteditable="true"]';
+    var cur = make("div", "cine-cursor");
+    cur.setAttribute("aria-hidden", "true");
+    cur.innerHTML = '<span class="cc-stretch"><span class="cc-body"></span></span>';
+    body.appendChild(cur);
+    var stretch = cur.firstChild;
+    var ease = reduce ? 1 : 0.2;     // the dot trails the real pointer, which stays visible
     var lx = innerWidth / 2, ly = innerHeight / 2, tx = lx, ty = ly, shown = false, raf = 0;
     // Not the header buttons (Contact / Download CV): they sit right next to the theme toggle
     var mags = Array.prototype.slice.call(document.querySelectorAll(".contact-btn, .fx-send")).map(function (e) {
@@ -247,9 +254,21 @@
     function loop() {
       raf = 0;
       var busy = false;
-      lx += (tx - lx) * 0.14; ly += (ty - ly) * 0.14;
-      light.style.transform = "translate3d(" + (lx - 300).toFixed(1) + "px," + (ly - 300).toFixed(1) + "px,0)";
-      if (Math.abs(tx - lx) > 0.3 || Math.abs(ty - ly) > 0.3) busy = true;
+      var dx = tx - lx, dy = ty - ly;
+      lx += dx * ease; ly += dy * ease;
+      cur.style.transform = "translate3d(" + lx.toFixed(1) + "px," + ly.toFixed(1) + "px,0)";
+      var sp = Math.sqrt(dx * dx + dy * dy);
+      if (sp > 0.3) {
+        busy = true;
+        if (!reduce) {                    // the dot stretches slightly along its direction of travel
+          var s = Math.min(sp * 0.012, 0.32);
+          stretch.style.setProperty("--rot", Math.atan2(dy, dx).toFixed(3) + "rad");
+          stretch.style.setProperty("--sx", (1 + s).toFixed(3));
+          stretch.style.setProperty("--sy", (1 - s * 0.45).toFixed(3));
+        }
+      } else {
+        stretch.style.setProperty("--sx", 1); stretch.style.setProperty("--sy", 1);
+      }
       mags.forEach(function (m) {
         m.x += (m.tx - m.x) * 0.18; m.y += (m.ty - m.y) * 0.18;
         if (Math.abs(m.tx - m.x) > 0.05 || Math.abs(m.ty - m.y) > 0.05) busy = true;
@@ -259,11 +278,26 @@
       if (busy) raf = requestAnimationFrame(loop);
     }
     function wake() { if (!raf) raf = requestAnimationFrame(loop); }
+    function hide() { cur.classList.remove("on", "down", "hover"); shown = false; }
+
+    function state(t) {
+      var el = t && t.closest ? t : null;
+      var text = !!(el && el.closest(TEXT));
+      var hov = !text && !!(el && el.closest(HOVER)) && !(el.closest(":disabled,[aria-disabled='true']"));
+      cur.classList.toggle("text", text);
+      cur.classList.toggle("hover", hov);
+    }
 
     addEventListener("pointermove", function (e) {
       if (e.pointerType && e.pointerType !== "mouse") return;
       tx = e.clientX; ty = e.clientY;
-      if (!shown) { shown = true; lx = tx; ly = ty; light.classList.add("on"); }
+      if (!shown) {
+        shown = true; lx = tx; ly = ty;
+        root.classList.add("cine-cursor-on");
+        cur.style.transform = "translate3d(" + lx + "px," + ly + "px,0)";
+        cur.classList.add("on");
+      }
+      state(e.target);
       mags.forEach(function (m) {
         var r = m.e.getBoundingClientRect();
         if (!r.width) { m.tx = m.ty = 0; return; }
@@ -275,11 +309,24 @@
       });
       wake();
     }, { passive: true });
+    addEventListener("pointerdown", function (e) {
+      if (e.pointerType && e.pointerType !== "mouse") return;
+      cur.classList.add("down");
+      if (reduce) return;
+      var p = document.createElement("span");          // click pulse
+      p.className = "cc-pulse";
+      p.addEventListener("animationend", function () { p.remove(); });
+      cur.appendChild(p);
+    }, { passive: true });
+    addEventListener("pointerup", function () { cur.classList.remove("down"); }, { passive: true });
+    addEventListener("scroll", function () { state(document.elementFromPoint(tx, ty)); }, { passive: true });
+    document.addEventListener("mouseleave", function () { hide(); mags.forEach(function (m) { m.tx = m.ty = 0; }); wake(); });
     root.addEventListener("pointerleave", function () {
-      light.classList.remove("on"); shown = false;
+      hide();
       mags.forEach(function (m) { m.tx = m.ty = 0; });
       wake();
     });
+    addEventListener("blur", hide);
   })();
 })();
 

@@ -22,7 +22,7 @@
       href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap"
       rel="stylesheet">
     <link rel="stylesheet" href="css/style.css?v=12">
-    <link rel="stylesheet" href="css/cinema.css?v=17">
+    <link rel="stylesheet" href="css/cinema.css?v=22">
     <link rel="stylesheet" href="css/feedback.css?v=11">
   </head>
   <body>
@@ -191,6 +191,20 @@
             <ul class="skills-fallback" id="skillsFallback"></ul>
           </div>
           <ul class="sr-only" id="skillsList"></ul>
+
+          <!-- "All Skills" button (bottom right) -> opens the skill levels popup below (js/skills.js) -->
+          <div class="sk-dock" id="skDock">
+            <span class="sk-label" id="skLabel" aria-hidden="true">
+              <span class="sk-label-text"><span style="--i:0">A</span><span style="--i:1">l</span><span style="--i:2">l</span><span class="sk-gap" style="--i:3"></span><span style="--i:4">S</span><span style="--i:5">k</span><span style="--i:6">i</span><span style="--i:7">l</span><span style="--i:8">l</span><span style="--i:9">s</span></span>
+              <i class="sk-label-line"></i>
+            </span>
+            <button class="sk-btn" id="skOpen" type="button" aria-haspopup="dialog"
+              aria-controls="skModal" aria-expanded="false" aria-label="Open all skills">
+              <span class="sk-btn-ping"></span><span class="sk-btn-ping sk-btn-ping2"></span>
+              <span class="sk-btn-ring"></span>
+              <span class="sk-btn-core"><span class="sk-bars" aria-hidden="true"><i></i><i></i><i></i></span></span>
+            </button>
+          </div>
         </section>
 
         <!-- GITHUB (filled in by github.js). Set data-user to your GitHub username;
@@ -398,6 +412,26 @@
         </section>
 
       </div></div>
+
+    <!-- ALL SKILLS POPUP: rows are built by js/skills.js from the admin's skills (percent = the optional admin value,
+         otherwise Large 90 / Medium 70 / Small 40). Lives at body level so no section can clip it. -->
+    <div class="sk-modal" id="skModal" hidden>
+      <div class="sk-backdrop" data-close></div>
+      <section class="sk-card" role="dialog" aria-modal="true" aria-labelledby="skTitle" tabindex="-1">
+        <span class="sk-edge" aria-hidden="true"></span>
+        <button class="sk-close" type="button" data-close aria-label="Close all skills" id="skClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <header class="sk-head">
+          <p class="sk-eyebrow">Proficiency</p>
+          <h3 class="sk-title" id="skTitle">All Skills</h3>
+          <i class="sk-rule" aria-hidden="true"></i>
+        </header>
+        <ul class="sk-list" id="skRows" tabindex="0" aria-label="Skill levels"></ul>
+        <footer class="sk-foot"><span id="skFootCount"></span></footer>
+      </section>
+    </div>
+
     <script src="js/theme.js?v=11"></script>
     <script src="js/loader.js?v=11"></script>
     <script src="/api/index?p=content"></script>
@@ -406,10 +440,10 @@
     <script src="js/script.js?v=11"></script>
     <script src="js/skills-physics.js?v=11"></script>
     <script src="js/skills-render.js?v=11"></script>
-    <script src="js/skills.js?v=11"></script>
+    <script src="js/skills.js?v=12"></script>
     <script src="js/github.js?v=11"></script>
     <script src="js/feedback.js?v=11"></script>
     <script src="js/profile.js?v=11"></script>
-    <script src="js/cinema.js?v=15"></script>
+    <script src="js/cinema.js?v=18"></script>
   </body>
 </html>

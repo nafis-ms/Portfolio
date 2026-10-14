@@ -34,7 +34,7 @@ const clone = o => JSON.parse(JSON.stringify(o));
 const DEFAULTS = {
   profile: {},     /* {about, phone, email, address, facebook, linkedin, whatsapp, discord, instagram}: empty = the page keeps its built-in text / hides the box */
   projects: [],    /* [{id, title, url, image}] */
-  skills: [],      /* [{id, name, logo, category, size, visible}] in display order */
+  skills: [],      /* [{id, name, logo, category, size, percent (0-100 or null), visible}] in display order */
   cv: null         /* {name, url} */
 };
 const MAX_PROJECTS = 24, MAX_SKILLS = 40, MAX_FEEDBACK = 1000, SLIDER_MAX = 300;
@@ -233,7 +233,13 @@ async function route(req, res, send) {
       if (area === "skills") {
         const fields = (b, cur) => {
           const name = S(b.name, 40); if (!name) throw new Error("Enter a skill name.");
-          return { name, category: S(b.category, 40), size: ["small", "medium", "large"].includes(b.size) ? b.size : "medium", visible: b.visible !== false };
+          let percent = null;                             /* optional skill level; empty = the popup uses the size default (large 90, medium 70, small 40) */
+          if (b.percent !== undefined && b.percent !== null && String(b.percent).trim() !== "") {
+            const n = Number(String(b.percent).trim().replace(/%$/, ""));
+            if (!Number.isFinite(n) || n < 0 || n > 100) throw new Error("Skill level must be a number from 0 to 100, or left empty.");
+            percent = Math.round(n);
+          }
+          return { name, category: S(b.category, 40), size: ["small", "medium", "large"].includes(b.size) ? b.size : "medium", visible: b.visible !== false, percent };
         };
         if (!id && m === "POST") {
           const b = body() || {}, f = fields(b), c = await getContent();

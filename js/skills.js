@@ -7,7 +7,9 @@
  *   this file:    data loading, cursor/touch interaction, the animation loop,
  *                 resizing, reduced motion and the no-WebGL fallback
  *
- * Skill shape: { id, name, logo, category, size: "small"|"medium"|"large", visible }
+ * Skill shape: { id, name, logo, category, size: "small"|"medium"|"large", percent (optional 0-100), visible }
+ * The "All Skills" popup (bottom-right button) shows each skill's percent; without one it uses the
+ * default for the sphere size: large 90, medium 70, small 40.
  * Add, edit, hide or delete skills in admin.html; nothing is hardcoded here. */
 (function () {
   "use strict";
@@ -48,6 +50,14 @@
     return "";
   }
 
+  var DEFAULT_LEVEL = { large: 90, medium: 70, small: 40 };   // used when the admin leaves the percent empty
+  function cleanPercent(v) {
+    if (v === null || v === undefined || String(v).trim() === "") return null;
+    var n = Number(String(v).replace(/%$/, ""));
+    return isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : null;
+  }
+  function levelOf(it) { return it.percent === null ? (DEFAULT_LEVEL[it.size] || 70) : it.percent; }
+
   function normalize(list) {
     var out = [];
     (Array.isArray(list) ? list : []).forEach(function (s, i) {
@@ -59,7 +69,8 @@
         name: name.slice(0, 40),
         logo: safeLogo(s.logo),
         category: String(s.category || "").trim().slice(0, 40),
-        size: SIZE_SCALE[s.size] ? s.size : "medium"
+        size: SIZE_SCALE[s.size] ? s.size : "medium",
+        percent: cleanPercent(s.percent)
       });
     });
     return out;
@@ -276,6 +287,144 @@
     cleanups = [];
     if (renderer) { renderer.dispose(); renderer = null; }
   });
+
+  /* ---------- "All Skills" popup ---------- */
+  (function popup() {
+    var modal = document.getElementById("skModal");
+    var openBtn = document.getElementById("skOpen");
+    if (!modal || !openBtn) return;
+    var rowsEl = document.getElementById("skRows");
+    var closeBtn = document.getElementById("skClose");
+    var footCount = document.getElementById("skFootCount");
+    var label = document.getElementById("skLabel");
+    var root = document.documentElement;
+    var isOpen = false, closeTimer = 0, countRAF = 0, lastFocus = null, counters = [];
+    var COUNT_MS = 1600;
+
+    if (reduce) modal.classList.add("sk-calm");     // no movement for "reduce motion" visitors
+
+    function build() {
+      rowsEl.textContent = "";
+      counters = [];
+      items.forEach(function (it, i) {
+        var v = levelOf(it);
+        var li = document.createElement("li");
+        li.className = "sk-row";
+        li.style.setProperty("--i", Math.min(i, 14));   // later rows share the last delay so a long list never feels slow
+        li.style.setProperty("--v", (v / 100).toFixed(3));
+
+        var ico = document.createElement("span");
+        ico.className = "sk-ico";
+        function letter() { ico.textContent = ""; var b = document.createElement("b"); b.textContent = it.name.charAt(0).toUpperCase(); ico.append(b); }
+        if (it.logo) {
+          var img = document.createElement("img");
+          img.alt = "";
+          img.decoding = "async";
+          img.addEventListener("error", letter);
+          img.src = it.logo;
+          ico.append(img);
+        } else letter();
+
+        var line = document.createElement("div");
+        line.className = "sk-line";
+        var name = document.createElement("span");
+        name.className = "sk-name";
+        name.textContent = it.name;                        // textContent: admin input can't inject HTML
+        if (it.category) { var cat = document.createElement("small"); cat.textContent = it.category; name.append(cat); }
+        var pct = document.createElement("span");
+        pct.className = "sk-pct";
+        var num = document.createElement("b");
+        num.textContent = reduce ? String(v) : "0";
+        pct.append(num, "%");
+        line.append(name, pct);
+
+        var track = document.createElement("div");
+        track.className = "sk-track";
+        track.setAttribute("role", "progressbar");
+        track.setAttribute("aria-label", it.name);
+        track.setAttribute("aria-valuemin", "0");
+        track.setAttribute("aria-valuemax", "100");
+        track.setAttribute("aria-valuenow", String(v));
+        var fill = document.createElement("i");
+        fill.className = "sk-fill";
+        track.append(fill);
+
+        li.append(ico, line, track);
+        rowsEl.append(li);
+        counters.push({ el: num, v: v, i: Math.min(i, 14) });
+      });
+      footCount.textContent = items.length + (items.length === 1 ? " skill" : " skills");
+    }
+
+    // numbers climb in step with the bars filling (same delay, same soft landing)
+    function countUp() {
+      cancelAnimationFrame(countRAF);
+      if (reduce) return;
+      var t0 = performance.now();
+      (function tick(now) {
+        var running = false;
+        counters.forEach(function (c) {
+          var p = (now - t0 - (500 + c.i * 70)) / COUNT_MS;
+          if (p < 1) running = true;
+          p = Math.max(0, Math.min(1, p));
+          c.el.textContent = Math.round(c.v * (1 - Math.pow(1 - p, 5)));
+        });
+        if (running && isOpen) countRAF = requestAnimationFrame(tick);
+        else counters.forEach(function (c) { c.el.textContent = c.v; });
+      })(t0);
+    }
+
+    function open() {
+      if (isOpen || !items.length) return;
+      isOpen = true;
+      clearTimeout(closeTimer);
+      lastFocus = document.activeElement;
+      build();
+      modal.hidden = false;
+      modal.classList.remove("is-closing");
+      var bar = window.innerWidth - root.clientWidth;      // the scrollbar disappears while locked: pad so the page does not jump
+      if (bar > 0) root.style.paddingRight = bar + "px";
+      root.classList.add("sk-lock");
+      rowsEl.scrollTop = 0;
+      void modal.offsetWidth;                              // start from the hidden look, then animate in
+      modal.classList.add("is-open");
+      openBtn.setAttribute("aria-expanded", "true");
+      countUp();
+      closeBtn.focus({ preventScroll: true });
+    }
+
+    function close() {
+      if (!isOpen) return;
+      isOpen = false;
+      cancelAnimationFrame(countRAF);
+      modal.classList.add("is-closing");
+      modal.classList.remove("is-open");
+      openBtn.setAttribute("aria-expanded", "false");
+      closeTimer = setTimeout(function () {
+        modal.hidden = true;
+        modal.classList.remove("is-closing");
+        root.classList.remove("sk-lock");
+        root.style.paddingRight = "";
+      }, reduce ? 180 : 650);
+      if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+    }
+
+    openBtn.addEventListener("click", open);
+    if (label) label.addEventListener("click", open);      // the "All Skills" text opens it too
+    modal.addEventListener("click", function (e) { if (e.target.closest("[data-close]")) close(); });
+    document.addEventListener("keydown", function (e) {
+      if (!isOpen) return;
+      if (e.key === "Escape") { e.preventDefault(); close(); return; }
+      if (e.key === "Tab") {                                // keep keyboard focus inside the popup
+        var stops = [closeBtn, rowsEl];
+        var at = stops.indexOf(document.activeElement);
+        e.preventDefault();
+        stops[(at + (e.shiftKey ? -1 : 1) + stops.length) % stops.length].focus({ preventScroll: true });
+      }
+    });
+    // never leave the page locked if it is closed while the popup is open
+    document.addEventListener("pagehide", function () { root.classList.remove("sk-lock"); root.style.paddingRight = ""; });
+  })();
 
   window.SkillsScene = { reload: load, world: world };   // handy for debugging in the console
   load();
