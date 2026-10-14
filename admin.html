@@ -25,7 +25,7 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700;800;900&display=swap"
       rel="stylesheet">
-    <link rel="stylesheet" href="css/admin.css?v=2">
+    <link rel="stylesheet" href="css/admin.css?v=3">
     <script src="js/theme.js" defer></script>
     <script src="js/admin-cinema.js?v=1" defer></script>
     <script src="js/fb-store.js"></script>
@@ -33,7 +33,7 @@
     <script src="js/admin.js" defer></script>
     <script src="js/admin-skills.js" defer></script>
     <script src="js/admin-feedback.js" defer></script>
-    <script src="js/admin-profile.js" defer></script>
+    <script src="js/admin-profile.js?v=2" defer></script>
     <script src="js/admin-ui.js?v=2" defer></script>
   </head>
   <body>
@@ -92,6 +92,10 @@
                 <span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg></span>
                 <span class="nl">Profile</span>
               </button>
+              <button class="navbtn" type="button" data-tab="social">
+                <span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" /></svg></span>
+                <span class="nl">Social</span>
+              </button>
               <button class="navbtn" type="button" data-tab="cv">
                 <span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h6" /></svg></span>
                 <span class="nl">CV</span>
@@ -134,7 +138,7 @@
           <section data-panel="overview" class="tab dash" hidden>
             <div class="hero">
               <div class="hero-left">
-                <h2 class="hello" id="dashHello"><span class="hello-a" id="dashHelloWord">Good Morning,</span> <span class="hello-b">Administrator</span> <span class="wave" aria-hidden="true">&#128075;</span></h2>
+                <h2 class="hello" id="dashHello"><span class="hello-a" id="dashHelloWord">Good Morning,</span> <span class="hello-b">Musbitul</span> <span class="wave" aria-hidden="true">&#128075;</span></h2>
                 <p class="tagline">Create &middot; Manage &middot; Publish &middot; Grow</p>
                 <p id="dashGreeting" class="hero-note">Everything you change here is saved on the server and goes
                   live on your site within a few seconds.</p>
@@ -410,8 +414,8 @@
           <section data-panel="profile" class="tab" hidden>
             <div class="tab-head">
               <h2>Profile</h2>
-              <p>The About paragraph, your contact details and your social
-                links. Empty fields are hidden on your site.</p>
+              <p>The About paragraph and your contact details. Empty fields are
+                hidden on your site.</p>
             </div>
             <form id="profForm" class="panel narrow-panel" novalidate>
               <h3>About</h3>
@@ -430,6 +434,21 @@
               <input id="profAddress" type="text" maxlength="160"
                 placeholder="City, Country" autocomplete="off">
 
+              <div class="row wrap-row">
+                <button class="btn" type="submit">Save profile</button>
+              </div>
+              <p id="profMsg" class="msg" role="status"></p>
+            </form>
+          </section>
+
+          <!-- ============ SOCIAL ============ -->
+          <section data-panel="social" class="tab" hidden>
+            <div class="tab-head">
+              <h2>Social</h2>
+              <p>The links in the Social section of your site. Empty fields are
+                hidden there.</p>
+            </div>
+            <form id="socialForm" class="panel narrow-panel" novalidate>
               <h3>Social links</h3>
               <label for="profFacebook">Facebook profile URL</label>
               <input id="profFacebook" type="url" maxlength="300"
@@ -448,9 +467,9 @@
                 placeholder="https://instagram.com/your.name" autocomplete="off">
 
               <div class="row wrap-row">
-                <button class="btn" type="submit">Save profile</button>
+                <button class="btn" type="submit">Save social links</button>
               </div>
-              <p id="profMsg" class="msg" role="status"></p>
+              <p id="socMsg" class="msg" role="status"></p>
             </form>
           </section>
 
