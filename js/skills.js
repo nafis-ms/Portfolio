@@ -206,6 +206,8 @@
     raf = 0;
   }
 
+  function isMobile() { return matchMedia("(pointer: coarse)").matches || innerWidth < 700; }
+
   /* ---------- resize ---------- */
   var resizeRAF = 0;
   function onResize() {
@@ -273,7 +275,8 @@
         start();
       } else {
         stop();                                              // no work while off-screen
-        if (!reduce && items.length) { world.enter(); parked = true; }   // ready to fly in again next time
+        // desktop: ready to fly in again every time the section is reached; phones and tablets play it only once
+        if (!reduce && items.length && !isMobile()) { world.enter(); parked = true; }
       }
     }, { rootMargin: "80px" });
     io.observe(section);
