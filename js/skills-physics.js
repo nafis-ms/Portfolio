@@ -50,7 +50,7 @@
 
     var rand = mulberry32(cfg.seed);
     var bodies = [];
-    var bounds = { w: 1.6, h: 1 };
+    var bounds = { w: 1.6, h: 1, view: 1.6 };   // view = half-width of the whole screen (spheres enter from beyond it)
     var pointer = { x: 0, y: 0, vx: 0, vy: 0, on: false };
     var time = 0, acc = 0;
     var dragFactor = Math.exp(-cfg.drag * cfg.substep);
@@ -95,10 +95,11 @@
       });
     }
 
-    function resize(w, h) {
+    function resize(w, h, viewW) {
       var sx = bounds.w ? w / bounds.w : 1, sy = bounds.h ? h / bounds.h : 1;
       bodies.forEach(function (b) { b.x *= sx; b.y *= sy; });
-      bounds.w = w; bounds.h = h;
+      bounds.w = w; bounds.h = h; bounds.view = Math.max(w, viewW || w);
+      bodies.forEach(function (b) { if (b.hold) b.x = (b.x < 0 ? -1 : 1) * (bounds.view + b.r + 0.2); });
     }
 
     function setPointer(x, y, vx, vy, on) {
@@ -111,7 +112,7 @@
       bodies.forEach(function (b, i) {
         var side = i % 2 ? 1 : -1;
         b.hold = true; b.entering = true; b.delay = 0;
-        b.x = side * (bounds.w + b.r + 0.2);
+        b.x = side * (bounds.view + b.r + 0.2);
         b.y = (rand() - 0.5) * bounds.h * 1.5;
         b.z = 0; b.vx = 0; b.vy = 0; b.vz = 0; b.wx = 0; b.wy = 0; b.wz = 0;
       });
