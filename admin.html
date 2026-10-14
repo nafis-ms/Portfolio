@@ -17,21 +17,24 @@
       })();
     </script>
     <title>Admin - Portfolio</title>
+    <!-- the same loading screen as the site -->
+    <script src="js/loader.js?v=12"></script>
     <link rel="icon" href="src/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700;800;900&display=swap"
       rel="stylesheet">
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/admin.css?v=2">
     <script src="js/theme.js" defer></script>
+    <script src="js/admin-cinema.js?v=1" defer></script>
     <script src="js/fb-store.js"></script>
     <script src="js/admin-api.js"></script>
     <script src="js/admin.js" defer></script>
     <script src="js/admin-skills.js" defer></script>
     <script src="js/admin-feedback.js" defer></script>
     <script src="js/admin-profile.js" defer></script>
-    <script src="js/admin-ui.js" defer></script>
+    <script src="js/admin-ui.js?v=2" defer></script>
   </head>
   <body>
 
@@ -64,8 +67,6 @@
     <div id="app" hidden>
       <div class="desk">
         <div class="win" id="win">
-
-          <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
 
           <!-- Sidebar: floating icon rail (becomes a bottom dock on phones) -->
           <aside class="sidebar">
@@ -133,7 +134,7 @@
           <section data-panel="overview" class="tab dash" hidden>
             <div class="hero">
               <div class="hero-left">
-                <h2 class="hello" id="dashHello"><span class="hello-a" id="dashHelloWord">Good Morning,</span> <span class="hello-b">Administrator <span class="wave" aria-hidden="true">&#128075;</span></span></h2>
+                <h2 class="hello" id="dashHello"><span class="hello-a" id="dashHelloWord">Good Morning,</span> <span class="hello-b">Administrator</span> <span class="wave" aria-hidden="true">&#128075;</span></h2>
                 <p class="tagline">Create &middot; Manage &middot; Publish &middot; Grow</p>
                 <p id="dashGreeting" class="hero-note">Everything you change here is saved on the server and goes
                   live on your site within a few seconds.</p>
@@ -162,10 +163,10 @@
               </div>
 
               <div class="stats">
-                <div class="stat" style="--c1:#ffb340;--c2:#ff9500"><span class="stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg></span><b id="statProjects">0</b><span>Projects</span></div>
-                <div class="stat" style="--c1:#d38cff;--c2:#af52de"><span class="stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M3 12h18" /></svg></span><b id="statSkills">0</b><span>Skills</span></div>
-                <div class="stat" style="--c1:#5be37d;--c2:#30b94d"><span class="stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" /></svg></span><b id="statFeedback">0</b><span>Feedback shown</span></div>
-                <div class="stat" style="--c1:#7fdcff;--c2:#32ade6"><span class="stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h6" /></svg></span><b id="statCv">No</b><span>CV uploaded</span></div>
+                <div class="stat" style="--c1:#8b7bff;--c2:#5548e6"><span class="stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg></span><b id="statProjects">0</b><span>Projects</span></div>
+                <div class="stat" style="--c1:#e879f9;--c2:#b600a8"><span class="stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M3 12h18" /></svg></span><b id="statSkills">0</b><span>Skills</span></div>
+                <div class="stat" style="--c1:#fb923c;--c2:#be4c00"><span class="stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" /></svg></span><b id="statFeedback">0</b><span>Feedback shown</span></div>
+                <div class="stat" style="--c1:#38bdf8;--c2:#0284c7"><span class="stat-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h6" /></svg></span><b id="statCv">No</b><span>CV uploaded</span></div>
               </div>
 
               <div class="panel quick">
@@ -181,7 +182,7 @@
               <div class="panel ring-card">
                 <h3>Today</h3>
                 <div class="ring" aria-hidden="true">
-                  <svg viewBox="0 0 140 140"><defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8f6bff"/><stop offset="1" stop-color="#d36bff"/></linearGradient></defs><circle class="ring-bg" cx="70" cy="70" r="58"/><circle class="ring-fg" id="ringFg" cx="70" cy="70" r="58"/></svg>
+                  <svg viewBox="0 0 140 140"><defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b7bff"/><stop offset="1" stop-color="#d946ef"/></linearGradient></defs><circle class="ring-bg" cx="70" cy="70" r="58"/><circle class="ring-fg" id="ringFg" cx="70" cy="70" r="58"/></svg>
                   <div class="ring-text"><b id="ringPct">0%</b><span>of the day</span></div>
                 </div>
                 <p class="hint ring-left" id="ringLeft"></p>
