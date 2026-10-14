@@ -16,12 +16,22 @@
       })();
     </script>
     <title>Musbitul - Portfolio</title>
+    <meta name="description" content="Portfolio of Musbitul Haque: software and web development projects, skills and contact details.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Musbitul Haque - Portfolio">
+    <meta property="og:description" content="Software and web development projects, skills and contact details.">
+    <meta name="twitter:card" content="summary">
+    <link rel="icon" href="src/favicon.svg" type="image/svg+xml">
+    <!-- the loading screen runs from the head so the page never shows before it covers it -->
+    <script src="js/loader.js?v=12"></script>
+    <!-- start fetching the site data right away; the script that uses it sits at the end of the page -->
+    <link rel="preload" href="/api/index?p=content" as="script">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
       href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap"
       rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=12">
+    <link rel="stylesheet" href="css/style.css?v=13">
     <link rel="stylesheet" href="css/cinema.css?v=24">
     <link rel="stylesheet" href="css/feedback.css?v=11">
   </head>
@@ -44,6 +54,7 @@
               <li><a href="#projects">Projects</a></li>
               <li hidden><a href="#skills">Skills</a></li>
               <li hidden><a href="#github">GitHub</a></li>
+              <li><a href="#feedback">Feedback</a></li>
               <li hidden><a href="#social">Social</a></li>
               <li><a href="#contact">Contact</a></li>
               <li class="cv-li"><a class="cv-btn" href="#" download="CV.pdf"
@@ -110,17 +121,21 @@
         <!-- ABOUT -->
         <section class="about snap-section" id="about">
           <img class="deco moon fade" data-x="-80" data-y="0" data-d="0.1"
-            data-dur="0.9" alt
-            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/moon_icon.11395d36.png">
+            data-dur="0.9" alt loading="lazy" decoding="async"
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/moon_icon.11395d36.png"
+            onerror="this.onerror=null;this.src='src/deco/moon.png'">
           <img class="deco p59 fade" data-x="-80" data-y="0" data-d="0.25"
-            data-dur="0.9" alt
-            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/p59_1.4659672e.png">
+            data-dur="0.9" alt loading="lazy" decoding="async"
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/p59_1.4659672e.png"
+            onerror="this.onerror=null;this.src='src/deco/p59.png'">
           <img class="deco lego fade" data-x="80" data-y="0" data-d="0.15"
-            data-dur="0.9" alt
-            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/lego_icon-1.703bb594.png">
+            data-dur="0.9" alt loading="lazy" decoding="async"
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/lego_icon-1.703bb594.png"
+            onerror="this.onerror=null;this.src='src/deco/lego.png'">
           <img class="deco group fade" data-x="80" data-y="0" data-d="0.3"
-            data-dur="0.9" alt
-            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/Group_134-1.2e04f3ce.png">
+            data-dur="0.9" alt loading="lazy" decoding="async"
+            src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/Group_134-1.2e04f3ce.png"
+            onerror="this.onerror=null;this.src='src/deco/group.png'">
           <div class="about-inner">
             <div class="about-block">
               <h2 class="hero-heading section-title fade" data-y="40"
@@ -161,7 +176,7 @@
         <section class="projects snap-section" id="projects"
           aria-label="Projects">
           <div class="orbit" id="orbit">
-            <h1 class="hero-heading orbit-title">Projects</h1>
+            <h2 class="hero-heading orbit-title">Projects</h2>
             <div class="orbit-center">
               <div class="char" id="orbitChar">
                 <video id="orbitCenter" src="src/working-loop.webm"
@@ -417,7 +432,7 @@
               project
               or an idea? Send me a message.</p>
             <a
-              href="https://mail.google.com/mail/?view=cm&fs=1&to=musbitul.haque.nafis%40gmail.com&su=Hello%20Musbitul"
+              href="mailto:musbitul.haque.nafis@gmail.com?subject=Hello%20Musbitul"
               target="_blank" rel="noopener noreferrer"
               class="contact-btn fade" data-y="20" data-d="0.3">Email Me</a>
           </div>
@@ -466,18 +481,17 @@
     </div>
 
     <script src="js/theme.js?v=11"></script>
-    <script src="js/loader.js?v=11"></script>
     <script src="/api/index?p=content"></script>
-    <script src="js/store.js?v=11"></script>
-    <script src="js/fb-store.js?v=11"></script>
-    <script src="js/script.js?v=11"></script>
+    <script src="js/store.js?v=12"></script>
+    <script src="js/fb-store.js?v=12"></script>
+    <script src="js/script.js?v=12"></script>
     <script src="js/skills-physics.js?v=11"></script>
     <script src="js/skills-render.js?v=11"></script>
     <script src="js/skills.js?v=12"></script>
     <script src="js/projects-all.js?v=1"></script>
     <script src="js/github.js?v=11"></script>
-    <script src="js/feedback.js?v=11"></script>
-    <script src="js/profile.js?v=11"></script>
-    <script src="js/cinema.js?v=18"></script>
+    <script src="js/feedback.js?v=12"></script>
+    <script src="js/profile.js?v=12"></script>
+    <script src="js/cinema.js?v=19"></script>
   </body>
 </html>

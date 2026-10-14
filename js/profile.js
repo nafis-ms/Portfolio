@@ -41,7 +41,8 @@
     // "Email Me" button in the contact section follows the admin's email
     if (email) {
       var btn = document.querySelector("#contact a.contact-btn");
-      if (btn) btn.href = "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(email) + "&su=" + encodeURIComponent("Hello Musbitul");
+      var who = (($(".gnav-logo .name") || {}).textContent || "").trim().split(/\s+/)[0];
+      if (btn) btn.href = "mailto:" + email + "?subject=" + encodeURIComponent("Hello" + (who ? " " + who : ""));
     }
 
     // Social links: a card shows only when its link is a valid http(s) address

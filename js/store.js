@@ -6,6 +6,7 @@
   "use strict";
   var site = window.SITE && typeof window.SITE === "object" ? window.SITE : {};
   function list(v) { return Array.isArray(v) ? v : []; }
+  if (!window.SITE) console.warn("[portfolio] /api/index?p=content did not load, so projects, skills and the CV are empty. The API only runs on Vercel (or `vercel dev`); see README.md.");
 
   window.PF = {
     // Profile: { about, phone, address, email, facebook, linkedin, whatsapp, discord, instagram } (all strings, all optional)

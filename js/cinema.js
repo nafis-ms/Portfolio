@@ -214,6 +214,7 @@
     (function frame(now) {
       requestAnimationFrame(frame);
       if (document.hidden) { last = now; return; }
+      if (now - last < 30) return;                       // ~30 fps is plenty for slow dust and halves the work
       var dt = Math.min(0.05, (now - last) / 1000 || 0);
       last = now; t += dt;
       g.setTransform(dpr, 0, 0, dpr, 0, 0);

@@ -46,7 +46,7 @@
       return fetch(API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: e.anonymous ? "" : e.name, anonymous: !!e.anonymous, rating: e.rating, message: e.message })
+        body: JSON.stringify({ name: e.anonymous ? "" : e.name, anonymous: !!e.anonymous, rating: e.rating, message: e.message, website: e.website || "" })
       }).then(function (r) { if (!r.ok) return fail(r); }, function () {
         throw new Error("Couldn't reach the server. Check your connection.");
       });

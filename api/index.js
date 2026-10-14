@@ -49,19 +49,47 @@ function cleanUrl(v) {                            /* http(s) only; "example.com/
   let u; try { u = new URL(v); } catch (e) { return null; }
   return /^https?:$/.test(u.protocol) && u.hostname.includes(".") ? u.href : null;
 }
+const URL_HINT = {
+  WhatsApp: "Use a link like https://wa.me/8801XXXXXXXXX, or just type your number with the country code.",
+  Discord: "Use an invite or profile link like https://discord.gg/your-invite (a username alone can't be linked).",
+  Facebook: "Use a link like https://facebook.com/your.name",
+  LinkedIn: "Use a link like https://linkedin.com/in/your-name",
+  Instagram: "Use a link like https://instagram.com/your.name"
+};
 function optUrl(v, label) {                       /* optional profile link: empty is fine, anything else must be a web address */
   v = S(v, 300);
   if (!v) return "";
+  if (label === "WhatsApp" && /^\+?[\d\s().-]{7,20}$/.test(v)) v = "https://wa.me/" + v.replace(/\D/g, "");   /* a bare phone number becomes a wa.me link */
   const u = cleanUrl(v);
-  if (!u) throw new Error("The " + label + " link isn't a valid web address.");
+  if (!u) throw new Error("The " + label + " link isn't a valid web address. " + (URL_HINT[label] || ""));
   return u;
 }
 
 async function getContent() {
   const c = clone(DEFAULTS), raw = await R("GET", "site:content");
-  if (raw) { try { const o = JSON.parse(raw); for (const k in o) c[k] = o[k]; } catch (e) {} }
+  if (raw) {
+    let o;
+    try { o = JSON.parse(raw); } catch (e) {
+      /* never fall back to empty defaults here: the next save would overwrite (wipe) the real data */
+      const err = new Error("The saved site data could not be read (invalid JSON). Nothing was changed. Check the site:content key in Upstash."); err.storage = true; throw err;
+    }
+    if (o && typeof o === "object") for (const k in o) c[k] = o[k];
+  }
   return c;
 }
+
+/* One save at a time: every admin save is read-modify-write on the same key, so two tabs saving together
+   would otherwise overwrite each other's change. A short Redis lock serialises them. */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function acquireLock() {
+  const token = crypto.randomBytes(8).toString("hex");
+  for (let i = 0; i < 30; i++) {
+    if (await R("SET", "site:lock", token, "NX", "EX", "20")) return token;
+    await sleep(200);
+  }
+  throw new Error("Another save is still in progress. Please try again in a moment.");
+}
+const releaseLock = token => R("EVAL", "if redis.call('get',KEYS[1])==ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end", "1", "site:lock", token);
 const setContent = c => R("SET", "site:content", JSON.stringify(c));
 
 /* Pictures (project covers, skill logos) are stored as "<mime>|<base64>" and served from /api/index?p=img/<id> */
@@ -96,7 +124,8 @@ const rating = v => Math.max(0, Math.min(5, Math.round(Number(v) || 0)));
    Content only holds {name, url}; the file itself is served by GET /api/index?p=cv */
 const CV_CHUNK = 600000, CV_MAX_B64 = 4200000;   /* ~3 MB file; Vercel's request body limit is 4.5 MB */
 async function cvMeta() { try { return JSON.parse((await R("GET", "site:cv:meta")) || "null"); } catch (e) { return null; } }
-async function delCvChunks(from, to) { for (let i = from; i < to; i++) await R("DEL", "site:cv:" + i); }
+const cvKey = (meta, i) => "site:cv:" + (meta && meta.ver ? meta.ver + ":" : "") + i;   /* old uploads have no version in their keys */
+async function delCvChunks(meta, from, to) { for (let i = from; i < to; i++) { try { await R("DEL", cvKey(meta, i)); } catch (e) {} } }
 
 async function route(req, res, send) {
   const u = new URL(req.url, "http://x"), q = u.searchParams, m = req.method;
@@ -107,7 +136,7 @@ async function route(req, res, send) {
   /* public: site content as a script, so the page can render before anything else runs */
   if (p === "/api/content" && m === "GET") {
     let c; try { c = await getContent(); } catch (e) { c = clone(DEFAULTS); }
-    res.statusCode = 200; res.setHeader("Content-Type", "text/javascript; charset=utf-8"); res.setHeader("Cache-Control", "no-store");
+    res.statusCode = 200; res.setHeader("Content-Type", "text/javascript; charset=utf-8"); res.setHeader("Cache-Control", "public, max-age=0, s-maxage=10, stale-while-revalidate=300");   /* fast for visitors, edits show within seconds */
     return res.end("window.SITE=" + JSON.stringify(c).replace(/</g, "\\u003c") + ";");
   }
   /* public: pictures */
@@ -124,7 +153,7 @@ async function route(req, res, send) {
     if (!meta || !meta.n) { res.statusCode = 404; return res.end("Not found"); }
     let b64 = "";
     for (let i = 0; i < meta.n; i++) {
-      const part = await R("GET", "site:cv:" + i);
+      const part = await R("GET", cvKey(meta, i));
       if (!part) { res.statusCode = 404; return res.end("Not found"); }
       b64 += part;
     }
@@ -145,7 +174,9 @@ async function route(req, res, send) {
       }
       if (m === "POST") {
         const b = body() || {}, anonymous = b.anonymous === true, name = anonymous ? "" : S(b.name, 60), message = S(b.message, SLIDER_MAX);
+        if (typeof b.website === "string" && b.website.trim()) return send(201, { ok: true });   /* honeypot filled: a bot. Pretend it worked. */
         if ((!anonymous && !name) || !message) return send(400, { error: "Please enter your name (or choose anonymous) and a message." });
+        if (!rating(b.rating)) return send(400, { error: "Please choose a star rating." });
         if (!(await R("SET", "rl:fb:" + ip, "1", "EX", "10", "NX"))) return send(429, { error: "Please wait a moment before sending again." });
         const n = await R("INCR", "rl:fbh:" + ip);
         if (n === 1) await R("EXPIRE", "rl:fbh:" + ip, 3600);
@@ -166,7 +197,12 @@ async function route(req, res, send) {
     const good = crypto.timingSafeEqual(hs(req.headers["x-admin-key"] || ""), hs(KEY));
     try {
       n = +(await R("GET", fk)) || 0;
-      if (n >= 10) return send(429, { error: "Too many attempts. Try again in a few minutes." });
+      if (n >= 10) {                                  /* locked for everyone on this IP (even the right password) so guessing can't continue */
+        let ttl = 0; try { ttl = +(await R("TTL", fk)) || 0; } catch (e) {}
+        const mins = Math.max(1, Math.ceil(ttl / 60));
+        res.setHeader("Retry-After", String(Math.max(1, ttl)));
+        return send(429, { error: "Too many wrong passwords from this network. Locked for about " + mins + " more minute" + (mins === 1 ? "" : "s") + ", even for the correct password." });
+      }
       if (!good) {
         if ((await R("INCR", fk)) === 1) await R("EXPIRE", fk, 600);
         return send(401, { error: "Wrong password." });
@@ -176,7 +212,10 @@ async function route(req, res, send) {
       if (!good) return send(e.storage ? 503 : 401, { error: e.storage ? e.message : "Wrong password." });   /* storage down: still never let a wrong password in */
     }
     const seg = p.split("/").filter(Boolean), area = seg[2], id = seg[3];
+    const needsLock = m !== "GET" && ["profile", "projects", "skills", "skills-order", "cv"].includes(area);
+    let lock = null;
     try {
+      if (needsLock) lock = await acquireLock();
       if (area === "ping" && m === "GET") {
         let storage = true; try { await R("PING"); } catch (e) { storage = false; }
         return send(200, { ok: true, storage });
@@ -280,7 +319,7 @@ async function route(req, res, send) {
         const b = m === "POST" ? body() : {}; if (!b) return send(400, { error: "Invalid input." });
         const c = await getContent(), old = await cvMeta(), oldN = (old && old.n) || 0;
         if (m === "DELETE" || !b.data) {
-          c.cv = null; await setContent(c); await delCvChunks(0, oldN); await R("DEL", "site:cv:meta");
+          c.cv = null; await setContent(c); await R("DEL", "site:cv:meta"); await delCvChunks(old, 0, oldN);
           return send(200, c);
         }
         const mm = /^data:application\/pdf;base64,([A-Za-z0-9+/=]+)$/.exec(typeof b.data === "string" ? b.data : "");
@@ -290,10 +329,12 @@ async function route(req, res, send) {
         if (Buffer.from(b64.slice(0, 8), "base64").toString("latin1").slice(0, 4) !== "%PDF") throw new Error("That file is not a valid PDF.");
         let name = S(b.name, 120).replace(/[\\\/]/g, "_") || "CV.pdf";
         if (!/\.pdf$/i.test(name)) name += ".pdf";
-        const cn = Math.ceil(b64.length / CV_CHUNK);
-        for (let i = 0; i < cn; i++) await R("SET", "site:cv:" + i, b64.slice(i * CV_CHUNK, (i + 1) * CV_CHUNK));
-        await R("SET", "site:cv:meta", JSON.stringify({ name, n: cn }));
-        await delCvChunks(cn, oldN);                       /* drop leftover chunks of a longer, older file */
+        const cn = Math.ceil(b64.length / CV_CHUNK), ver = newId(), fresh = { name, n: cn, ver };
+        try {                                              /* write the new file under its own keys, then switch over: the old CV keeps working if this fails halfway */
+          for (let i = 0; i < cn; i++) await R("SET", cvKey(fresh, i), b64.slice(i * CV_CHUNK, (i + 1) * CV_CHUNK));
+          await R("SET", "site:cv:meta", JSON.stringify(fresh));
+        } catch (e) { await delCvChunks(fresh, 0, cn); throw e; }
+        await delCvChunks(old, 0, oldN);                   /* the old file's chunks are no longer referenced */
         c.cv = { name, url: "/api/index?p=cv&v=" + Date.now().toString(36) };
         await setContent(c); return send(200, c);
       }
@@ -336,6 +377,7 @@ async function route(req, res, send) {
         if (m === "DELETE") { await R("HDEL", "site:fb", id); return send(200, { ok: true }); }
       }
     } catch (e) { return send(e.storage ? 503 : 400, { error: e.message }); }
+    finally { if (lock) { try { await releaseLock(lock); } catch (e) {} } }
     return send(404, { error: "Not found." });
   }
   return send(404, { error: "Not found." });

@@ -106,19 +106,29 @@ function playReveal() {
 }
 function buildAbout(raw) {
   if (!anim) return;
-  const text = String(raw).replace(/\s+/g, " ").trim();
-  if (!text) return;
-  const words = text
-    .split(" ")
-    .map(
-      (w) =>
-        `<span class="w">${[...w]
-          .map((c) => `<span class="ch"><i>${esc(c)}</i><b>${esc(c)}</b></span>`)
-          .join("")}</span>`,
+  // A blank line in the admin's text starts a new paragraph; everything else is one flowing paragraph
+  const paras = String(raw)
+    .replace(/\r/g, "")
+    .split(/\n\s*\n/)
+    .map((p) => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+  if (!paras.length) return;
+  const text = paras.join(" ");
+  const html = paras
+    .map((para) =>
+      para
+        .split(" ")
+        .map(
+          (w) =>
+            `<span class="w">${[...w]
+              .map((c) => `<span class="ch"><i>${esc(c)}</i><b>${esc(c)}</b></span>`)
+              .join("")}</span>`,
+        )
+        .join(" "),
     )
-    .join(" ");
+    .join("<br><br>");
   // Screen readers get the real text; the per-letter spans are hidden from them
-  anim.innerHTML = `<span class="sr-only"></span><span aria-hidden="true">${words}</span>`;
+  anim.innerHTML = `<span class="sr-only"></span><span aria-hidden="true">${html}</span>`;
   anim.firstChild.textContent = text;
   chars = [...anim.querySelectorAll(".ch b")];
   if (reduce || aboutInView) {
@@ -201,7 +211,11 @@ if (vid && !isSafari && !LITE) {
   vid.remove();
 }
 
-(function loop(t) {
+let heroOn = true,
+  loopRAF = 0;
+function loop(t) {
+  loopRAF = 0;
+  if (!heroOn) return; // hero is off screen: stop until it comes back (see the observer below)
   // Idle sway when there is no pointer activity (e.g. phones)
   const touchOnly = matchMedia("(hover: none)").matches;
   if (
@@ -218,13 +232,22 @@ if (vid && !isSafari && !LITE) {
   charY += (ty - charY) * 0.08;
   if (vid && vid.duration && stage.classList.contains("use-video")) {
     const want = ((charX + 1) / 2) * vid.duration;
-    if (Math.abs(vid.currentTime - want) > 0.01) vid.currentTime = want;
+    // seek only when it matters and never while the last seek is still running (avoids stutter)
+    if (!vid.seeking && Math.abs(vid.currentTime - want) > 0.04) vid.currentTime = want;
   }
   stage.style.transform = reduce
     ? "none"
     : `translate(${charX * 14}px, ${charY * 8}px) rotate(${charX * 2}deg)`;
-  requestAnimationFrame(loop);
-})(0);
+  loopRAF = requestAnimationFrame(loop);
+}
+const homeSec = $("home");
+if (homeSec) {
+  new IntersectionObserver(([e]) => {
+    heroOn = e.isIntersecting;
+    if (heroOn && !loopRAF) loopRAF = requestAnimationFrame(loop);
+  }).observe(homeSec);
+}
+loop(0);
 
 /* ---------- Fit the hero title (two lines) to the screen ---------- */
 const heroTitle = document.querySelector(".hero-title");
@@ -266,7 +289,7 @@ fitTitle();
     fallback = $("orbitFallback");
   if (!section || !orbit || !holder) return;
 
-  // If src/working.webm can't load, show the text instead
+  // If src/working-loop.webm can't load, show the text instead
   centerVideo.addEventListener("error", () => {
     centerChar.hidden = true;
     fallback.hidden = false;
@@ -716,31 +739,6 @@ fitTitle();
   setTimeout(step, HOLD);
 })();
 
-/* ---------- Contact: copy email address ---------- */
-(function () {
-  const btn = $("copyMail"),
-    link = $("mailLink");
-  if (!btn || !link) return;
-  const addr = link.textContent.trim();
-  btn.addEventListener("click", async () => {
-    let ok = false;
-    try {
-      await navigator.clipboard.writeText(addr);
-      ok = true;
-    } catch {
-      const t = document.createElement("textarea");
-      t.value = addr;
-      t.style.position = "fixed";
-      t.style.opacity = "0";
-      document.body.append(t);
-      t.select();
-      try { ok = document.execCommand("copy"); } catch {}
-      t.remove();
-    }
-    btn.textContent = ok ? "Copied" : "Copy failed";
-    setTimeout(() => (btn.textContent = "Copy"), 1800);
-  });
-})();
 /* ---------- Debug panel: open the site with ?debug=1 to see why an effect is off ---------- */
 if (/[?&]debug=1/.test(location.search)) {
   const box = document.createElement("pre");
@@ -757,6 +755,7 @@ if (/[?&]debug=1/.test(location.search)) {
     prev = pos;
     const sec = $("skills");
     box.textContent = [
+      "site data (/api/index?p=content): " + (window.SITE ? "loaded" : "NOT LOADED - projects, skills and CV will be empty"),
       "reduced motion (applied): " + reduce,
       "OS reduce-motion setting: " + matchMedia("(prefers-reduced-motion: reduce)").matches,
       "touch mode (images, no video): " + LITE,

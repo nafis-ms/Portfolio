@@ -149,7 +149,8 @@
     say($("#formMsg"), "");
   });
 
-  // Resize to max 900px and re-encode as JPEG so uploads stay small
+  // Resize to max 900px and re-encode so uploads stay small. WebP keeps transparency; browsers that
+  // cannot encode WebP (older Safari) get a JPEG on a dark background instead.
   function processImage(file) {
     return new Promise(function (resolve, reject) {
       if (!/^image\//.test(file.type)) return reject(new Error("Please choose an image file."));
@@ -160,12 +161,20 @@
         c.width = Math.max(1, Math.round(im.width * s));
         c.height = Math.max(1, Math.round(im.height * s));
         var ctx = c.getContext("2d");
-        ctx.fillStyle = "#15151a";
-        ctx.fillRect(0, 0, c.width, c.height);
         ctx.drawImage(im, 0, 0, c.width, c.height);
         URL.revokeObjectURL(objUrl);
-        var out = "";
-        [0.82, 0.7, 0.55, 0.4].some(function (q) { out = c.toDataURL("image/jpeg", q); return out.length < 600000; });
+        var out = "", webp = true;
+        [0.85, 0.72, 0.58, 0.42].some(function (q) {
+          out = c.toDataURL("image/webp", q);
+          if (out.indexOf("data:image/webp") !== 0) { webp = false; return true; }   // not supported here
+          return out.length < 600000;
+        });
+        if (!webp || out.length >= 600000) {
+          ctx.globalCompositeOperation = "destination-over";    // paint the dark fill behind the picture
+          ctx.fillStyle = "#15151a";
+          ctx.fillRect(0, 0, c.width, c.height);
+          [0.82, 0.7, 0.55, 0.4].some(function (q) { out = c.toDataURL("image/jpeg", q); return out.length < 600000; });
+        }
         resolve(out);
       };
       im.onerror = function () {

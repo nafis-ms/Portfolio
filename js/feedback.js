@@ -159,8 +159,16 @@
   });
   slidesEl.addEventListener("pointercancel", function () { sx = null; });
 
+  var lastSig = null;                                       // what the slider currently shows (so a refresh only rebuilds on a real change)
   function load() {
-    S.publicList().then(build, function () { build([]); });
+    S.publicList().then(function (list) {
+      var sig = JSON.stringify(list);
+      if (sig === lastSig) return;
+      lastSig = sig;
+      build(list);
+    }, function () {
+      if (lastSig === null) { lastSig = "error"; build([]); }  // first load failed: show the empty state; later failures keep what is shown
+    });
   }
   setInterval(function () { if (!document.hidden) load(); }, 120000);
 

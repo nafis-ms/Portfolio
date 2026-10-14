@@ -96,7 +96,7 @@
   if (g) {
     var h = new Date().getHours();
     var hello = h < 5 ? "Working late" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
-    g.textContent = hello + ". Everything you change here is saved on the server and goes live on your site straight away.";
+    g.textContent = hello + ". Everything you change here is saved on the server and goes live on your site within a few seconds.";
   }
 
   /* ---------- numbers ---------- */
@@ -127,7 +127,7 @@
     if (!el || !window.ADMIN || !ADMIN.hasKey()) return;
     ADMIN.api("admin/ping").then(function (r) {
       el.textContent = r.storage
-        ? "Connected. Every change you save here is live on your site straight away."
+        ? "Connected. Every change you save here is live on your site within a few seconds."
         : "The password works, but storage isn't connected. Add the Upstash Redis integration to this Vercel project and redeploy.";
       el.className = "msg status " + (r.storage ? "ok" : "error");
     }, function (err) { el.textContent = err.message; el.className = "msg status error"; });
