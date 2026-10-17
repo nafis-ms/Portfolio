@@ -630,3 +630,12 @@ html[data-theme="light"] .cine-cursor { --cc-rgb: 14 165 233; }
   .side-foot .icon-btn { width: 36px; height: 36px; }
   .fb-status { display: none; }
 }
+
+
+/* ---- Project status badges ---- */
+.pstatus { display: inline-flex; align-items: center; gap: 0.4rem; margin: 0.15rem 0 0.2rem; padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em; border: 1px solid currentColor; background: color-mix(in srgb, currentColor 14%, transparent); }
+.pstatus::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pstatus-online { color: #2fbf71; }
+.pstatus-offline { color: #ef5b5b; }
+.pstatus-local { color: #e0a82e; }
+.pstatus-construction { color: #4aa3ff; }
