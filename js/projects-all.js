@@ -21,6 +21,8 @@
   var fine = matchMedia("(hover: hover) and (pointer: fine)").matches;
   if (reduce) modal.classList.add("pj-calm");
 
+  var STATUS_LABEL = { online: "Online", offline: "Offline", local: "Local Device Only", construction: "Under Construction" };
+
   /* ---------- data (same checks the orbit uses: a title, a picture and an http(s) link) ---------- */
   function safeUrl(u) {
     try {
@@ -34,8 +36,9 @@
     (Array.isArray(all) ? all : []).forEach(function (p) {
       var title = String((p && p.title) || "").trim();
       var image = String((p && p.image) || "").trim();
-      var url = safeUrl(p && p.url);
-      if (title && image && url) out.push({ title: title, image: image, url: url });
+      var url = safeUrl(p && p.url);                          // optional for projects that are not online
+      var status = STATUS_LABEL[p && p.status] ? p.status : "online";
+      if (title && image && (url || status !== "online")) out.push({ title: title, image: image, url: url, status: status });
     });
     return out;
   }
@@ -56,10 +59,15 @@
       li.style.setProperty("--i", Math.min(i, 16));           // later cards share the last delay so a long list never drags
       var a = document.createElement("a");
       a.className = "pj-card";
-      a.href = p.url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.setAttribute("aria-label", p.title + " (opens in a new tab)");
+      if (p.url) {
+        a.href = p.url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.setAttribute("aria-label", p.title + ", " + STATUS_LABEL[p.status] + " (opens in a new tab)");
+      } else {
+        a.classList.add("no-link");
+        a.setAttribute("aria-label", p.title + ", " + STATUS_LABEL[p.status]);
+      }
 
       var media = document.createElement("span");
       media.className = "pj-media";
@@ -85,10 +93,15 @@
       t.textContent = p.title;                                // textContent: admin input can't inject HTML
       var h = document.createElement("span");
       h.className = "pj-host";
-      h.textContent = host(p.url);
-      info.append(t, h);
+      h.textContent = p.url ? host(p.url) : "No public link";
+      var badge = document.createElement("span");
+      badge.className = "pstatus pstatus-" + p.status;
+      badge.textContent = STATUS_LABEL[p.status];
+      info.append(t, badge, h);
 
-      a.append(media, num, visit, info);
+      a.append(media, num);
+      if (p.url) a.append(visit);
+      a.append(info);
       li.append(a);
       grid.append(li);
     });
