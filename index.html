@@ -31,7 +31,7 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap"
       rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=13">
+    <link rel="stylesheet" href="css/style.css?v=15">
     <link rel="stylesheet" href="css/cinema.css?v=29">
     <link rel="stylesheet" href="css/feedback.css?v=11">
   </head>
@@ -179,13 +179,9 @@
             <h2 class="hero-heading orbit-title">Projects</h2>
             <div class="orbit-center">
               <div class="char" id="orbitChar">
-                <video id="orbitCenter" src="src/working-loop.webm"
-                  poster="src/working-poster.webp" muted playsinline
-                  preload="metadata" role="img"
-                  aria-label="Animated character working on a laptop"></video>
-                <span class="char-hi" id="charHi" aria-hidden="true">Hi!</span>
-                <!-- hover / tap area over the character: it says hi -->
-                <span class="char-hit" id="charHit" aria-hidden="true"></span>
+                <img id="orbitCenter" class="char-img" src="src/work.webp"
+                  alt="Character working on a laptop" draggable="false"
+                  width="900" height="900" decoding="async">
               </div>
               <h2 id="orbitFallback" class="hero-heading section-title"
                 hidden>Project is fun</h2>
@@ -484,11 +480,11 @@
     <script src="/api/index?p=content"></script>
     <script src="js/store.js?v=12"></script>
     <script src="js/fb-store.js?v=12"></script>
-    <script src="js/script.js?v=12"></script>
+    <script src="js/script.js?v=14"></script>
     <script src="js/skills-physics.js?v=12"></script>
     <script src="js/skills-render.js?v=11"></script>
     <script src="js/skills.js?v=14"></script>
-    <script src="js/projects-all.js?v=1"></script>
+    <script src="js/projects-all.js?v=2"></script>
     <script src="js/github.js?v=11"></script>
     <script src="js/feedback.js?v=12"></script>
     <script src="js/profile.js?v=12"></script>
