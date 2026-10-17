@@ -179,9 +179,13 @@
             <h2 class="hero-heading orbit-title">Projects</h2>
             <div class="orbit-center">
               <div class="char" id="orbitChar">
-                <img id="orbitCenter" class="char-img" src="src/work.webp"
-                  alt="Character working on a laptop" draggable="false"
-                  width="900" height="900" decoding="async">
+                <video id="orbitCenter" src="src/working-hi.webm?v=2"
+                  poster="src/work.webp" muted playsinline
+                  preload="metadata" role="img"
+                  aria-label="Animated character working on a laptop"></video>
+                <span class="char-hi" id="charHi" aria-hidden="true">Hi!</span>
+                <!-- hover / tap area over the character: it says hi -->
+                <span class="char-hit" id="charHit" aria-hidden="true"></span>
               </div>
               <h2 id="orbitFallback" class="hero-heading section-title"
                 hidden>Project is fun</h2>
@@ -480,7 +484,7 @@
     <script src="/api/index?p=content"></script>
     <script src="js/store.js?v=12"></script>
     <script src="js/fb-store.js?v=12"></script>
-    <script src="js/script.js?v=14"></script>
+    <script src="js/script.js?v=16"></script>
     <script src="js/skills-physics.js?v=12"></script>
     <script src="js/skills-render.js?v=11"></script>
     <script src="js/skills.js?v=14"></script>
