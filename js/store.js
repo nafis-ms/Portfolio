@@ -13,7 +13,7 @@
     profile: { get: function () { return site.profile && typeof site.profile === "object" ? site.profile : {}; } },
     // Skills: [{ id, name, logo, category, size, visible }] in display order
     skills: { all: function () { return list(site.skills); } },
-    // Projects: [{ id, title, url, image }]
+    // Projects: [{ id, title, url, image, status }]  status: online | offline | local | construction
     projects: { all: function () { return list(site.projects); } },
     // CV: { name, url } or null
     cv: { get: function () { return site.cv && typeof site.cv.url === "string" ? site.cv : null; } }
