@@ -1415,3 +1415,19 @@ html[data-theme="dark"] { color-scheme: dark; }
   -webkit-text-fill-color: transparent;
 }
 [data-theme="light"] .type-cursor { background: #0ea5e9; }
+
+/* ---- Project status badges (orbit cards + All Projects gallery) ---- */
+.pstatus { display: inline-flex; align-items: center; gap: 0.35rem; align-self: flex-start; width: fit-content; font-style: normal; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.04em; line-height: 1; padding: 0.28rem 0.6rem; border-radius: 999px; border: 1px solid currentColor; background: color-mix(in srgb, currentColor 16%, transparent); white-space: nowrap; }
+.pstatus::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.pstatus-online { color: #2fbf71; }
+.pstatus-offline { color: #ef5b5b; }
+.pstatus-local { color: #e0a82e; }
+.pstatus-construction { color: #4aa3ff; }
+.orbit-card { position: absolute; }
+.orbit-card .pstatus { position: absolute; left: 0.4rem; top: 0.4rem; z-index: 2; font-size: 0.58rem; padding: 0.22rem 0.5rem; color-scheme: dark; background: rgba(10, 10, 20, 0.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.orbit-card .pstatus-online { color: #4be08f; }
+.orbit-card .pstatus-offline { color: #ff7b7b; }
+.orbit-card .pstatus-local { color: #f3c14d; }
+.orbit-card .pstatus-construction { color: #6bb6ff; }
+.orbit-card.no-link, .pj-card.no-link { cursor: default; }
+.pj-info .pstatus { margin: 0.1rem 0 0.15rem; }
