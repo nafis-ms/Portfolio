@@ -295,7 +295,7 @@ fitTitle();
     fallback = $("orbitFallback");
   if (!section || !orbit || !holder) return;
 
-  // If src/work.webp can't load, show the text instead
+  // If src/working-hi.webm can't load, show the text instead
   centerVideo.addEventListener("error", () => {
     centerChar.hidden = true;
     fallback.hidden = false;
@@ -415,6 +415,223 @@ fitTitle();
 
   load();
 })();
+/* ---------- Projects: the character says hi ---------- */
+// working-hi.webm (24 fps) is made of two parts:
+//   frames  0 - 49   IDLE   typing forward, then in reverse. Loops forever.
+//   frames 50 - 146  GREET  the original clip: typing, he looks forward, he waves.
+// Hover or tap: jump to the same pose in GREET (no visible cut) and carry on, sped up while
+// he is still just typing. He waves and holds the wave. When the pointer leaves, the "Hi!"
+// bubble and the character fade out together, the video resets to the typing loop, and the
+// character fades back in.
+(function () {
+  const char = $("orbitChar"),
+    video = $("orbitCenter"),
+    hit = $("charHit"),
+    section = $("projects");
+  if (!char || !video || !hit || !section) return;
+
+  /* Mobile / touch: no video. Show work.png, and hi.png while hovered / tapped.
+   * The images are looked for in src/, then next to index.html, so a wrong folder cannot make
+   * the character vanish. If none is found, the poster image (then the text) is shown instead. */
+  if (LITE) {
+    const DIRS = ["src/", "", "images/", "assets/"];
+    const EXTS = ["webp", "png"]; // work.webp / hi.webp are the light versions
+    const img = document.createElement("img");
+    img.className = "char-img";
+    img.alt = "Character working on a laptop";
+    img.draggable = false;
+    video.replaceWith(img);
+
+    let base = null, // folder + ext that worked, e.g. "src/" + "webp"
+      WORK = "",
+      HI = "",
+      t = 0;
+    const poster = video.getAttribute("poster");
+    const combos = [];
+    DIRS.forEach((d) => EXTS.forEach((x) => combos.push([d, x])));
+    (function find(i) {
+      if (i >= combos.length) {
+        if (poster) {
+          img.src = poster; // last resort: the still frame
+          img.onerror = () => {
+            char.hidden = true;
+            const fb = $("orbitFallback");
+            if (fb) fb.hidden = false;
+          };
+        }
+        return;
+      }
+      const [d, x] = combos[i];
+      const probe = new Image();
+      probe.onload = () => {
+        base = d;
+        WORK = d + "work." + x;
+        HI = d + "hi." + x;
+        img.src = WORK;
+        new Image().src = HI; // preload so the swap is instant
+      };
+      probe.onerror = () => find(i + 1);
+      probe.src = d + "work." + x;
+    })(0);
+
+    const sayHi = () => {
+      clearTimeout(t);
+      if (base !== null) img.src = HI;
+      char.classList.add("is-hi");
+    };
+    const back = (e) => {
+      clearTimeout(t);
+      // finger: keep the greeting visible a moment after the tap
+      t = setTimeout(
+        () => {
+          if (base !== null) img.src = WORK;
+          char.classList.remove("is-hi");
+        },
+        e.pointerType === "mouse" ? 250 : 1400,
+      );
+    };
+    hit.addEventListener("pointerenter", sayHi);
+    hit.addEventListener("pointerdown", sayHi);
+    hit.addEventListener("pointerleave", back);
+    hit.addEventListener("pointercancel", back);
+    return;
+  }
+
+  video.preload = "auto";
+
+  const FPS = 24;
+  const f = (n) => n / FPS;
+  const HALF = 0.5 / FPS; // aim at the middle of a frame so seeks never land on its neighbour
+  const TYPE_END = f(26); // idle: end of the forward half
+  const IDLE_LEN = f(50); // idle: forward + reverse. GREET (the original clip) starts here
+  const HOLD_AT = f(50 + 95); // the wave is held from here (the last frame is 146)
+  const WAVE_AT = IDLE_LEN + 2.4; // the hand goes up: the "Hi!" bubble pops up
+  const DONE_AT = IDLE_LEN + 3.3; // touch: let the wave play at least until here
+  const LEAD_RATE = 2; // speed while he is still typing, so he looks up sooner
+  const FADE_MS = 550; // keep in step with the fade-out time on ".char.is-fading video" in style.css
+
+  let mode = "idle", // "idle" | "greet"
+    holding = false, // paused on the wave while hovered
+    leaving = false, // the pointer has left: the bubble must not come back
+    visible = false,
+    endT = 0,
+    resetT = 0,
+    raf = 0;
+
+  const seek = (t) => (video.currentTime = t + HALF);
+  const rate = (r) => {
+    if (video.playbackRate !== r) video.playbackRate = r;
+  };
+  // Where is the current frame in the original clip?
+  function originalTime(t) {
+    if (t < TYPE_END) return t; // idle, forward half
+    if (t < IDLE_LEN) return IDLE_LEN - t; // idle, reverse half
+    return t - IDLE_LEN; // greet
+  }
+
+  function tick() {
+    raf = 0;
+    const t = video.currentTime;
+    if (mode === "idle") {
+      if (t >= IDLE_LEN) seek(0); // the first frame matches the last: seamless loop
+    } else {
+      if (t >= WAVE_AT && !leaving) char.classList.add("is-hi");
+      rate(t - IDLE_LEN < TYPE_END - 0.08 ? LEAD_RATE : 1);
+      if (t >= HOLD_AT) {
+        holding = true; // hold the wave while the pointer stays
+        video.pause();
+      }
+    }
+    if (video.paused || video.ended) return;
+    raf = requestAnimationFrame(tick);
+  }
+
+  // Play only while the section is on screen (muted, so autoplay is allowed)
+  function sync() {
+    const want = visible && !document.hidden && !reduce;
+    if (!want) {
+      if (!video.paused) video.pause();
+    } else if (video.paused && !holding) {
+      video.play().catch(() => {}); // autoplay blocked: the poster stays
+    }
+    if (want && !raf) raf = requestAnimationFrame(tick);
+  }
+
+  function greet() {
+    clearTimeout(endT);
+    clearTimeout(resetT);
+    leaving = false;
+    char.classList.remove("is-fading"); // came back before the fade finished
+    if (mode === "greet") {
+      if (holding) char.classList.add("is-hi"); // (while playing, tick brings the bubble back)
+      return;
+    }
+    mode = "greet";
+    if (reduce) return char.classList.add("is-hi"); // reduced motion: just the bubble
+    seek(IDLE_LEN + originalTime(video.currentTime)); // same picture, now in the original clip
+    sync();
+  }
+
+  // Bubble and character fade out together, then he is back at his laptop, fading in
+  function fadeOut() {
+    if (mode !== "greet") return;
+    leaving = true;
+    char.classList.remove("is-hi");
+    if (reduce) {
+      mode = "idle";
+      leaving = false;
+      return;
+    }
+    char.classList.add("is-fading");
+    resetT = setTimeout(reset, FADE_MS);
+  }
+
+  function reset() {
+    mode = "idle";
+    holding = false;
+    leaving = false;
+    rate(1);
+    seek(0);
+    sync();
+    let shown = false;
+    const show = () => {
+      if (shown) return;
+      shown = true;
+      char.classList.remove("is-fading"); // fades back in, already on the typing frame
+    };
+    video.addEventListener("seeked", show, { once: true });
+    setTimeout(show, 350);
+  }
+
+  // Touch has no hover: after the finger lifts, let the look-forward and the wave play first
+  function touchEnd() {
+    if (mode === "greet" && !holding && !video.paused && video.currentTime < DONE_AT) {
+      endT = setTimeout(touchEnd, 100);
+    } else fadeOut();
+  }
+
+  function leave(e) {
+    clearTimeout(endT);
+    endT = setTimeout(e.pointerType === "mouse" ? fadeOut : touchEnd, 250);
+  }
+
+  hit.addEventListener("pointerenter", greet);
+  hit.addEventListener("pointerdown", greet);
+  hit.addEventListener("pointerleave", leave);
+  hit.addEventListener("pointercancel", leave);
+  video.addEventListener("playing", () => {
+    if (!raf) raf = requestAnimationFrame(tick);
+  });
+  document.addEventListener("visibilitychange", sync);
+  new IntersectionObserver(
+    ([e]) => {
+      visible = e.isIntersecting;
+      sync();
+    },
+    { threshold: 0.1 },
+  ).observe(section);
+})();
+
 /* ---------- CV download buttons ---------- */
 // The CV uploaded in the admin panel (store.js). If there is none, a cv.pdf next to
 // index.html is used when it exists. No CV = buttons stay hidden.
