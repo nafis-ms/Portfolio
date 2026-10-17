@@ -55,6 +55,9 @@
   }
 
   /* ---------- list ---------- */
+  var STATUS_LABEL = { online: "Online", offline: "Offline", local: "Local Device Only", construction: "Under Construction" };
+  function statusOf(p) { return STATUS_LABEL[p && p.status] ? p.status : "online"; }
+
   function render() {
     var projects = (ADMIN.data && ADMIN.data.projects) || [];
     var list = $("#list");
@@ -75,13 +78,23 @@
       var name = document.createElement("div");
       name.className = "name";
       name.textContent = p.title;
-      var site = document.createElement("a");
+      var st = statusOf(p);
+      var badge = document.createElement("span");
+      badge.className = "pstatus pstatus-" + st;
+      badge.textContent = STATUS_LABEL[st];
+      var site;
+      if (p.url) {
+        site = document.createElement("a");
+        site.href = p.url;
+        site.target = "_blank";
+        site.rel = "noopener noreferrer";
+        site.textContent = p.url;
+      } else {
+        site = document.createElement("span");
+        site.textContent = "No link";
+      }
       site.className = "site";
-      site.href = p.url;
-      site.target = "_blank";
-      site.rel = "noopener noreferrer";
-      site.textContent = p.url;
-      meta.append(name, site);
+      meta.append(name, badge, site);
 
       var actions = document.createElement("div");
       actions.className = "actions";
@@ -134,7 +147,8 @@
     editingId = p.id;
     form.reset();
     $("#title").value = p.title;
-    $("#url").value = p.url;
+    $("#status").value = statusOf(p);
+    $("#url").value = p.url || "";
     setImage(p.image);
     $("#formTitle").textContent = "Edit project";
     $("#save").textContent = "Save changes";
@@ -209,17 +223,19 @@
     say(msg, "");
     if (busy) return;
     var title = $("#title").value.trim();
-    var url = cleanUrl($("#url").value);
+    var status = $("#status").value;
+    var rawUrl = $("#url").value.trim();
+    var url = rawUrl ? cleanUrl(rawUrl) : "";
     if (!title) return say(msg, "Enter a project name.", "error");
     if (title.length > 80) return say(msg, "Project name must be 80 characters or fewer.", "error");
-    if (!url) return say(msg, "Enter a full URL, for example https://example.com", "error");
+    if (!url && (status === "online" || rawUrl)) return say(msg, "Enter a full URL, for example https://example.com", "error");
     if (!image) return say(msg, "Choose an image.", "error");
     if (!editingId && ((ADMIN.data && ADMIN.data.projects) || []).length >= MAX_PROJECTS) {
       return say(msg, "Limit of " + MAX_PROJECTS + " projects reached.", "error");
     }
 
     var wasEdit = !!editingId;
-    var body = { title: title, url: url };
+    var body = { title: title, url: url, status: status };
     if (image.indexOf("data:") === 0) body.image = image;          // only send a picture that was just chosen
     busy = true;
     $("#save").disabled = true;
