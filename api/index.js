@@ -33,10 +33,12 @@ const clone = o => JSON.parse(JSON.stringify(o));
 
 const DEFAULTS = {
   profile: {},     /* {about, phone, email, address, facebook, linkedin, whatsapp, discord, instagram}: empty = the page keeps its built-in text / hides the box */
-  projects: [],    /* [{id, title, url, image}] */
+  projects: [],    /* [{id, title, url, image, status}] status: online | offline | local | construction */
   skills: [],      /* [{id, name, logo, category, size, percent (0-100 or null), visible}] in display order */
   cv: null         /* {name, url} */
 };
+const PROJECT_STATUSES = ["online", "offline", "local", "construction"];
+const projStatus = v => PROJECT_STATUSES.includes(v) ? v : "online";   /* old projects without a status count as Online */
 const MAX_PROJECTS = 24, MAX_SKILLS = 40, MAX_FEEDBACK = 1000, SLIDER_MAX = 1000;
 
 const S = (v, n) => typeof v === "string" ? v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim().slice(0, n) : "";
@@ -237,25 +239,25 @@ async function route(req, res, send) {
       /* projects: title + link + picture */
       if (area === "projects") {
         if (!id && m === "POST") {
-          const b = body() || {}, title = S(b.title, 80), url = cleanUrl(b.url);
+          const b = body() || {}, title = S(b.title, 80), url = cleanUrl(b.url), status = projStatus(b.status);
           if (!title) throw new Error("Enter a project name.");
-          if (!url) throw new Error("Enter a full URL, for example https://example.com");
+          if (!url && (status === "online" || S(b.url, 500))) throw new Error("Enter a full URL, for example https://example.com");
           if (!b.image) throw new Error("Choose an image.");
           const c = await getContent();
           if (c.projects.length >= MAX_PROJECTS) throw new Error("Limit of " + MAX_PROJECTS + " projects reached.");
           const image = await saveImage(b.image, 700000);
-          c.projects.push({ id: newId(), title, url, image });
+          c.projects.push({ id: newId(), title, url: url || "", image, status });
           await setContent(c); return send(201, c);
         }
         if (id && m === "POST") {
           const b = body() || {}, c = await getContent(), pr = c.projects.find(x => x.id === id);
           if (!pr) return send(404, { error: "Not found." });
-          const title = S(b.title, 80), url = cleanUrl(b.url);
+          const title = S(b.title, 80), url = cleanUrl(b.url), status = projStatus(b.status);
           if (!title) throw new Error("Enter a project name.");
-          if (!url) throw new Error("Enter a full URL, for example https://example.com");
+          if (!url && (status === "online" || S(b.url, 500))) throw new Error("Enter a full URL, for example https://example.com");
           const old = pr.image;
           if (b.image) pr.image = await saveImage(b.image, 700000);
-          pr.title = title; pr.url = url;
+          pr.title = title; pr.url = url || ""; pr.status = status;
           await setContent(c); if (b.image) await dropImage(old);
           return send(200, c);
         }
