@@ -25,7 +25,7 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700;800;900&display=swap"
       rel="stylesheet">
-    <link rel="stylesheet" href="css/admin.css?v=5">
+    <link rel="stylesheet" href="css/admin.css?v=6">
     <script src="js/theme.js" defer></script>
     <script src="js/admin-cinema.js?v=1" defer></script>
     <script src="js/fb-store.js"></script>
@@ -211,9 +211,18 @@
                   <input id="title" type="text" maxlength="80"
                     placeholder="Aura Brand Identity">
 
+                  <label for="status">Project status</label>
+                  <select id="status">
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                    <option value="local">Local Device Only</option>
+                    <option value="construction">Under Construction</option>
+                  </select>
+
                   <label for="url">Project URL</label>
                   <input id="url" type="url" maxlength="500"
                     placeholder="https://example.com">
+                  <p class="hint" id="urlHint">Required for Online projects. Optional for the other statuses; without a link the card is not clickable.</p>
 
                   <label for="image">Image</label>
                   <input id="image" type="file" accept="image/*">
