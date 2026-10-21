@@ -42,7 +42,9 @@ const LITE = matchMedia("(hover: none), (pointer: coarse)").matches;
     })
     .filter((t) => t.el);
 
+  let navTick = false;
   function onNavScroll() {
+    navTick = false;
     nav.classList.toggle("scrolled", scrollY > 20);
     let active = null;
     targets.forEach((t) => {
@@ -51,7 +53,17 @@ const LITE = matchMedia("(hover: none), (pointer: coarse)").matches;
     });
     links.forEach((a) => a.classList.toggle("active", a === active));
   }
-  addEventListener("scroll", onNavScroll, { passive: true });
+  // run at most once per frame (scroll events can fire several times per frame)
+  addEventListener(
+    "scroll",
+    () => {
+      if (!navTick) {
+        navTick = true;
+        requestAnimationFrame(onNavScroll);
+      }
+    },
+    { passive: true },
+  );
   onNavScroll();
 })();
 
@@ -85,13 +97,23 @@ let aboutInView = false;
 let revealRAF;
 const esc = (c) =>
   c.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+let revealP = null; // progress last painted (null = nothing painted yet)
 const setReveal = (p) => {
   const n = chars.length;
-  chars.forEach((c, i) => {
+  // Each letter fades during its own 1/n slice of the progress, so while the
+  // progress only moves forward just the letters in between need a new value.
+  let a = 0,
+    b = n - 1;
+  if (revealP !== null && p >= revealP) {
+    a = Math.max(0, Math.floor(revealP * n) - 1);
+    b = Math.min(n - 1, Math.floor(p * n) + 1);
+  }
+  revealP = p;
+  for (let i = a; i <= b; i++) {
     const from = i / n,
       to = (i + 1) / n;
-    c.style.opacity = 0.2 + 0.8 * clamp((p - from) / (to - from), 0, 1);
-  });
+    chars[i].style.opacity = 0.2 + 0.8 * clamp((p - from) / (to - from), 0, 1);
+  }
 };
 function playReveal() {
   cancelAnimationFrame(revealRAF);
@@ -131,6 +153,7 @@ function buildAbout(raw) {
   anim.innerHTML = `<span class="sr-only"></span><span aria-hidden="true">${html}</span>`;
   anim.firstChild.textContent = text;
   chars = [...anim.querySelectorAll(".ch b")];
+  revealP = null; // new letters: paint all of them on the next call
   if (reduce || aboutInView) {
     setReveal(reduce ? 1 : 0);
     if (aboutInView) playReveal();
@@ -175,6 +198,20 @@ function setPose(name) {
   current = name;
 }
 
+let pendX = 0,
+  pendY = 0,
+  pending = false;
+// Pointer events only store the position; the frame loop does the (layout-reading) maths once per frame.
+function wakeLoop() {
+  if (!loopRAF && heroOn) loopRAF = requestAnimationFrame(loop);
+}
+function queueTrack(clientX, clientY) {
+  pendX = clientX;
+  pendY = clientY;
+  pending = true;
+  lastMove = performance.now();
+  wakeLoop();
+}
 function track(clientX, clientY) {
   const r = stage.getBoundingClientRect();
   const dx = (clientX - (r.left + r.width / 2)) / innerWidth; // roughly -0.5..0.5
@@ -184,16 +221,18 @@ function track(clientX, clientY) {
   setPose(dx < -DEAD_ZONE ? "left" : dx > DEAD_ZONE ? "right" : "front");
   lastMove = performance.now();
 }
-addEventListener("pointermove", (e) => track(e.clientX, e.clientY), {
+addEventListener("pointermove", (e) => queueTrack(e.clientX, e.clientY), {
   passive: true,
 });
 // Touch screens have no hover: a tap turns him toward the finger
-addEventListener("pointerdown", (e) => track(e.clientX, e.clientY), {
+addEventListener("pointerdown", (e) => queueTrack(e.clientX, e.clientY), {
   passive: true,
 });
 document.documentElement.addEventListener("pointerleave", () => {
+  pending = false;
   tx = ty = 0;
   setPose("front");
+  wakeLoop(); // ease back to the centre
 });
 
 // Optional scrubbed video (Chrome/Edge/Firefox). Safari can't show transparent WebM, so it keeps the images.
@@ -202,7 +241,10 @@ const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(
   navigator.userAgent,
 );
 if (vid && !isSafari && !LITE) {
-  vid.addEventListener("loadeddata", () => stage.classList.add("use-video"));
+  vid.addEventListener("loadeddata", () => {
+    stage.classList.add("use-video");
+    wakeLoop(); // the loop may be asleep: it has to seek the freshly loaded video
+  });
   vid.addEventListener("error", () => stage.classList.remove("use-video"));
   vid.preload = "auto";
   vid.load();
@@ -212,12 +254,17 @@ if (vid && !isSafari && !LITE) {
 }
 
 let heroOn = true,
-  loopRAF = 0;
+  loopRAF = 0,
+  lastTransform = "";
+const touchOnly = matchMedia("(hover: none)").matches; // fixed for the session: read once, not every frame
 function loop(t) {
   loopRAF = 0;
   if (!heroOn) return; // hero is off screen: stop until it comes back (see the observer below)
+  if (pending) {
+    pending = false;
+    track(pendX, pendY);
+  }
   // Idle sway when there is no pointer activity (e.g. phones)
-  const touchOnly = matchMedia("(hover: none)").matches;
   if (
     !reduce &&
     (lastMove === 0 || touchOnly) &&
@@ -230,15 +277,31 @@ function loop(t) {
   }
   charX += (tx - charX) * 0.08;
   charY += (ty - charY) * 0.08;
+  // settled (less than a thousandth of a pixel away): land exactly so the loop can go quiet
+  if (Math.abs(tx - charX) < 0.0001) charX = tx;
+  if (Math.abs(ty - charY) < 0.0001) charY = ty;
   if (vid && vid.duration && stage.classList.contains("use-video")) {
     const want = ((charX + 1) / 2) * vid.duration;
     // seek only when it matters and never while the last seek is still running (avoids stutter)
     if (!vid.seeking && Math.abs(vid.currentTime - want) > 0.04) vid.currentTime = want;
   }
-  stage.style.transform = reduce
+  const next = reduce
     ? "none"
     : `translate(${charX * 14}px, ${charY * 8}px) rotate(${charX * 2}deg)`;
-  loopRAF = requestAnimationFrame(loop);
+  if (next !== lastTransform) {
+    stage.style.transform = next; // only touch the style when the value really changed
+    lastTransform = next;
+  }
+  // Keep running while anything can still change; otherwise sleep until the next
+  // pointer event, the idle sway or the video needs it (they all restart the loop).
+  const idleSway = !reduce && (lastMove === 0 || touchOnly);
+  const settled =
+    charX === tx &&
+    charY === ty &&
+    !pending &&
+    !idleSway &&
+    !(vid && vid.duration && stage.classList.contains("use-video") && (vid.seeking || Math.abs(vid.currentTime - ((charX + 1) / 2) * vid.duration) > 0.04));
+  if (!settled) loopRAF = requestAnimationFrame(loop);
 }
 const homeSec = $("home");
 if (homeSec) {
@@ -327,7 +390,11 @@ fitTitle();
       el.style.transform = `translate(-50%, -50%) translate(${Math.cos(a) * rx}px, ${d * ry}px) scale(${0.7 + 0.3 * k})`;
       el.style.opacity = 0.45 + 0.55 * k;
       // back half sits behind the centre image (z 5), front half in front of it
-      el.style.zIndex = d < 0 ? 1 + Math.round(k * 6) : 20 + Math.round(d * 10);
+      const z = d < 0 ? 1 + Math.round(k * 6) : 20 + Math.round(d * 10);
+      if (el._z !== z) {
+        el._z = z; // z-index changes re-sort the stacking order: only write it when it changes
+        el.style.zIndex = z;
+      }
     });
   }
 
