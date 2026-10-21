@@ -40,15 +40,24 @@
       el.classList.add("settled");
       el.removeEventListener("transitionend", onEnd);
     });
-    el.addEventListener("pointermove", function (e) {
+    // pointer events only remember the position; the card is updated once per frame
+    var cx = 0, cy = 0, queued = false, inside = false;
+    function paintTilt() {
+      queued = false;
+      if (!inside) return;
       var r = el.getBoundingClientRect();
-      var px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+      var px = (cx - r.left) / r.width, py = (cy - r.top) / r.height;
       el.style.setProperty("--mx", (px * 100).toFixed(1) + "%");
       el.style.setProperty("--my", (py * 100).toFixed(1) + "%");
       el.style.setProperty("--ry", ((px - 0.5) * 2 * MAX).toFixed(2) + "deg");
       el.style.setProperty("--rx", ((0.5 - py) * 2 * MAX).toFixed(2) + "deg");
+    }
+    el.addEventListener("pointermove", function (e) {
+      cx = e.clientX; cy = e.clientY; inside = true;
+      if (!queued) { queued = true; requestAnimationFrame(paintTilt); }
     });
     el.addEventListener("pointerleave", function () {
+      inside = false;
       el.style.setProperty("--rx", "0deg");
       el.style.setProperty("--ry", "0deg");
     });
@@ -384,6 +393,7 @@
     var stretch = cur.firstChild;
     var ease = reduce ? 1 : 0.2;     // the dot trails the real pointer, which stays visible
     var lx = innerWidth / 2, ly = innerHeight / 2, tx = lx, ty = ly, shown = false, raf = 0;
+    var lastTarget = null, mex = 0, mey = 0, magDirty = false, scrollQueued = false;
     // Not the header buttons (Contact / Download CV): they sit right next to the theme toggle
     var mags = Array.prototype.slice.call(document.querySelectorAll(".contact-btn, .fx-send")).map(function (e) {
       return { e: e, x: 0, y: 0, tx: 0, ty: 0 };
@@ -392,6 +402,18 @@
     function loop() {
       raf = 0;
       var busy = false;
+      if (magDirty) {                     // read every button's position first, then write (no layout thrashing)
+        magDirty = false;
+        mags.forEach(function (m) {
+          var r = m.e.getBoundingClientRect();
+          if (!r.width) { m.tx = m.ty = 0; return; }
+          var cx = r.left + r.width / 2 - m.x, cy = r.top + r.height / 2 - m.y;   // centre without the current pull
+          var dx = mex - cx, dy = mey - cy;
+          var near = Math.abs(dx) < r.width / 2 + 50 && Math.abs(dy) < r.height / 2 + 40;
+          m.tx = near ? clamp(dx * 0.25, -14, 14) : 0;
+          m.ty = near ? clamp(dy * 0.35, -10, 10) : 0;
+        });
+      }
       var dx = tx - lx, dy = ty - ly;
       lx += dx * ease; ly += dy * ease;
       cur.style.transform = "translate3d(" + lx.toFixed(1) + "px," + ly.toFixed(1) + "px,0)";
@@ -416,9 +438,11 @@
       if (busy) raf = requestAnimationFrame(loop);
     }
     function wake() { if (!raf) raf = requestAnimationFrame(loop); }
-    function hide() { cur.classList.remove("on", "down", "hover"); shown = false; }
+    function hide() { cur.classList.remove("on", "down", "hover"); shown = false; lastTarget = null; magDirty = false; }
 
     function state(t) {
+      if (t === lastTarget && t) return;           // same element as last time: nothing can have changed
+      lastTarget = t;
       var el = t && t.closest ? t : null;
       var text = !!(el && el.closest(TEXT));
       var hov = !text && !!(el && el.closest(HOVER)) && !(el.closest(":disabled,[aria-disabled='true']"));
@@ -436,15 +460,7 @@
         cur.classList.add("on");
       }
       state(e.target);
-      mags.forEach(function (m) {
-        var r = m.e.getBoundingClientRect();
-        if (!r.width) { m.tx = m.ty = 0; return; }
-        var cx = r.left + r.width / 2 - m.x, cy = r.top + r.height / 2 - m.y;   // centre without the current pull
-        var dx = e.clientX - cx, dy = e.clientY - cy;
-        var near = Math.abs(dx) < r.width / 2 + 50 && Math.abs(dy) < r.height / 2 + 40;
-        m.tx = near ? clamp(dx * 0.25, -14, 14) : 0;
-        m.ty = near ? clamp(dy * 0.35, -10, 10) : 0;
-      });
+      mex = e.clientX; mey = e.clientY; magDirty = true;
       wake();
     }, { passive: true });
     addEventListener("pointerdown", function (e) {
@@ -457,7 +473,15 @@
       cur.appendChild(p);
     }, { passive: true });
     addEventListener("pointerup", function () { cur.classList.remove("down"); }, { passive: true });
-    addEventListener("scroll", function () { state(document.elementFromPoint(tx, ty)); }, { passive: true });
+    addEventListener("scroll", function () {
+      if (scrollQueued) return;                    // hit-testing is costly: once per frame is plenty
+      scrollQueued = true;
+      requestAnimationFrame(function () {
+        scrollQueued = false;
+        lastTarget = null;                         // the page moved under the pointer: look again
+        state(document.elementFromPoint(tx, ty));
+      });
+    }, { passive: true });
     document.addEventListener("mouseleave", function () { hide(); mags.forEach(function (m) { m.tx = m.ty = 0; }); wake(); });
     root.addEventListener("pointerleave", function () {
       hide();
