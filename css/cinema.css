@@ -64,7 +64,7 @@ html[data-theme="light"] .cine-grain { opacity: 0.035; mix-blend-mode: multiply;
     scale 1.2s var(--cine-ease),
     letter-spacing 1.6s var(--cine-ease);
 }
-.fade.in { filter: blur(0); scale: 1; }
+.fade.in { filter: none; scale: 1; }
 .section-title.fade { letter-spacing: 0.07em; }
 .section-title.fade.in { letter-spacing: -0.025em; }
 
@@ -1746,3 +1746,38 @@ html .pj-btn .pj-ico,
 html .pj-btn .pj-go,
 html .pj-btn:hover .pj-go { box-shadow: none; }
 html .pj-btn .pj-ico i { box-shadow: none; }
+
+/* =====================================================================
+   Performance: pause the endless ambient animations of any section that is off screen.
+   (.cine-seen is switched on by js/cinema.js while a section is on screen and, on desktop, removed
+   once it is fully gone.) The animations simply carry on when the section comes back, so nothing
+   looks different; the browser just stops repainting things nobody can see.
+   Not touched: the Feedback slider timer (it drives the slides) and the hero intro replay.
+   ===================================================================== */
+html.cine-fx .hero:not(.cine-seen) .hero-title,
+html.cine-fx .about:not(.cine-seen)::before,
+html.cine-fx .social:not(.cine-seen)::before,
+html.cine-fx .contact:not(.cine-seen)::before,
+html.cine-fx .projects:not(.cine-seen)::before,
+html.cine-fx .skills:not(.cine-seen)::before,
+html.cine-fx .github:not(.cine-seen)::before,
+html.cine-fx .feedback:not(.cine-seen)::before,
+html.cine-fx .about:not(.cine-seen) .info-box::before,
+html.cine-fx .about:not(.cine-seen) .info-ico,
+html.cine-fx .social:not(.cine-seen) .social-card::before,
+html.cine-fx .social:not(.cine-seen) .social-ico,
+html.cine-fx .github:not(.cine-seen) .gh-card::before,
+html.cine-fx .feedback:not(.cine-seen) .fx-form::before,
+html.cine-fx .feedback:not(.cine-seen) .fx-board::before,
+html.cine-fx .feedback:not(.cine-seen) .fx-board::after,
+html.cine-fx .feedback:not(.cine-seen) .fx-quote-mark,
+html.cine-fx .skills:not(.cine-seen) .sk-dock,
+html.cine-fx .skills:not(.cine-seen) .sk-dock *,
+html.cine-fx .skills:not(.cine-seen) .sk-dock *::before,
+html.cine-fx .skills:not(.cine-seen) .sk-dock *::after,
+html.cine-fx .projects:not(.cine-seen) .pj-dock,
+html.cine-fx .projects:not(.cine-seen) .pj-dock *,
+html.cine-fx .projects:not(.cine-seen) .pj-dock *::before,
+html.cine-fx .projects:not(.cine-seen) .pj-dock *::after {
+  animation-play-state: paused;
+}
