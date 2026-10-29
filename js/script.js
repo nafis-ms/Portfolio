@@ -446,6 +446,12 @@ fitTitle();
       cap.textContent = title; // textContent, so admin input can't inject HTML
 
       a.append(im, badge, cap);
+      // hover details (description, language, stars...): see js/project-meta.js + css/project-hover.css
+      if (window.PFMeta) {
+        let host = "";
+        try { host = url ? new URL(url).hostname.replace(/^www\./, "") : ""; } catch {}
+        PFMeta.attach(a, { title, url, status }, { status: PROJECT_STATUS[status], host });
+      }
       holder.append(a);
       items.push(a);
     });
@@ -456,11 +462,41 @@ fitTitle();
   }
 
   // Pause while hovering or focusing a card
+  const HOVER_SCALE = 1.5; // keep in sync with css/project-hover.css (.orbit-card:hover { scale })
+  function keepInView(c) {
+    // the hovered card grows from its centre: nudge it sideways so a card at the edge of the orbit is never cut off
+    const b = c.getBoundingClientRect(),
+      cs = section.getBoundingClientRect(),
+      half = (b.width * HOVER_SCALE) / 2,
+      cx = b.left + b.width / 2,
+      min = Math.max(0, cs.left) + 10,
+      max = Math.min(innerWidth, cs.right) - 10;
+    let dx = 0;
+    if (cx - half < min) dx = min - (cx - half);
+    else if (cx + half > max) dx = max - (cx + half);
+    c.style.setProperty("--hx", Math.round(dx) + "px");
+  }
   holder.addEventListener("pointerover", (e) => {
-    if (e.target.closest(".orbit-card")) paused = true;
+    const c = e.target.closest(".orbit-card");
+    if (!c) return;
+    paused = true;
+    if (e.relatedTarget && c.contains(e.relatedTarget)) return; // moving inside the same card: it is already enlarged
+    keepInView(c);
   });
   holder.addEventListener("pointerout", () => (paused = false));
-  holder.addEventListener("focusin", () => (paused = true));
+  // light that follows the pointer across the hovered card (read by css/project-hover.css)
+  holder.addEventListener("pointermove", (e) => {
+    const c = e.target.closest(".orbit-card");
+    if (!c) return;
+    const r = c.getBoundingClientRect();
+    c.style.setProperty("--mx", (((e.clientX - r.left) / r.width) * 100).toFixed(1) + "%");
+    c.style.setProperty("--my", (((e.clientY - r.top) / r.height) * 100).toFixed(1) + "%");
+  });
+  holder.addEventListener("focusin", (e) => {
+    paused = true;
+    const c = e.target.closest(".orbit-card");
+    if (c) keepInView(c);
+  });
   holder.addEventListener("focusout", () => (paused = false));
 
   new IntersectionObserver(([e]) => (visible = e.isIntersecting), {
