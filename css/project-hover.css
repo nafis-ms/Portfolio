@@ -1,0 +1,183 @@
+/* =====================================================================
+   PROJECT HOVER: cards show only the project NAME.
+   Hovering (or keyboard-focusing) a card pops it bigger and reveals the description and the other details in a
+   cinematic sequence. The overlay (.hp) is built by js/project-meta.js. Applies to the orbit cards and to the
+   All Projects gallery cards.
+
+   Touch screens have no hover, so they keep the plain cards (name + status badge) and a tap opens the project.
+   ===================================================================== */
+:root {
+  --hp-ease: cubic-bezier(0.16, 1, 0.3, 1);          /* long, soft landing */
+  --hp-pop: cubic-bezier(0.22, 1.12, 0.36, 1);       /* tiny overshoot, like a lens racking into focus */
+}
+.orbit-card {
+  --hp-a: 99 102 241;
+  --hp-b: 217 70 239;
+}
+html[data-theme="light"] .orbit-card {
+  --hp-a: 56 189 248;
+  --hp-b: 2 132 199;
+}
+.pj-card {
+  --hp-a: var(--pj-a);
+  --hp-b: var(--pj-b);
+}
+
+.hp { display: none; }
+
+@media (hover: hover) and (pointer: fine) {
+
+  /* ---------- the details overlay ---------- */
+  .hp {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.5em;
+    padding: 11% 9% 8%;
+    color: #f4f6fb;
+    text-align: left;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    background:
+      radial-gradient(120% 90% at 0% 0%, rgb(var(--hp-a) / 0.28), transparent 60%),
+      linear-gradient(180deg, rgba(8, 8, 18, 0.35) 0%, rgba(8, 8, 18, 0.86) 42%, rgba(8, 8, 18, 0.96) 100%);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+  }
+  .orbit-card:hover .hp, .orbit-card:focus-visible .hp,
+  .pj-card:hover .hp, .pj-card:focus-visible .hp {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease 0.08s, visibility 0s;
+  }
+
+  /* each part flies up and focuses in, one after the other */
+  .hp > * {
+    flex: none;
+    min-width: 0;
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(5px);
+    transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
+  }
+  .orbit-card:hover .hp > *, .orbit-card:focus-visible .hp > *,
+  .pj-card:hover .hp > *, .pj-card:focus-visible .hp > * {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+    transition: opacity 0.7s ease, transform 0.9s var(--hp-ease), filter 0.7s ease;
+  }
+  .orbit-card:hover .hp-bar, .orbit-card:focus-visible .hp-bar,
+  .pj-card:hover .hp-bar, .pj-card:focus-visible .hp-bar { transition-delay: 0.16s; }
+  .orbit-card:hover .hp-t,   .orbit-card:focus-visible .hp-t,
+  .pj-card:hover .hp-t,      .pj-card:focus-visible .hp-t   { transition-delay: 0.22s; }
+  .orbit-card:hover .hp-d,   .orbit-card:focus-visible .hp-d,
+  .pj-card:hover .hp-d,      .pj-card:focus-visible .hp-d   { transition-delay: 0.32s; }
+  .orbit-card:hover .hp-m,   .orbit-card:focus-visible .hp-m,
+  .pj-card:hover .hp-m,      .pj-card:focus-visible .hp-m   { transition-delay: 0.42s; }
+  .orbit-card:hover .hp-f,   .orbit-card:focus-visible .hp-f,
+  .pj-card:hover .hp-f,      .pj-card:focus-visible .hp-f   { transition-delay: 0.52s; }
+
+  .hp i { font-style: normal; }
+  .hp-bar { display: block; height: 2px; width: 0; border-radius: 2px; background: linear-gradient(90deg, rgb(var(--hp-a)), rgb(var(--hp-b))); }
+  .orbit-card:hover .hp-bar, .orbit-card:focus-visible .hp-bar,
+  .pj-card:hover .hp-bar, .pj-card:focus-visible .hp-bar { width: 3.6em; transition: opacity 0.7s ease 0.16s, transform 0.9s var(--hp-ease) 0.16s, filter 0.7s ease 0.16s, width 1s var(--hp-ease) 0.2s; }
+  .hp-t { display: block; font-size: 1.45em; font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .hp-d { display: -webkit-box; -webkit-line-clamp: var(--hp-lines, 3); -webkit-box-orient: vertical; overflow: hidden; font-size: 0.95em; line-height: 1.45; color: rgba(238, 242, 247, 0.86); overflow-wrap: anywhere; }
+  .hp-m { display: flex; flex-wrap: wrap; gap: 0.4em; }
+  .hp-chip { display: inline-flex; align-items: center; gap: 0.45em; font-size: 0.78em; font-weight: 600; letter-spacing: 0.04em; line-height: 1; padding: 0.38em 0.8em; border-radius: 999px; white-space: nowrap; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.24); }
+  .hp-st::before { content: ""; width: 0.6em; height: 0.6em; border-radius: 50%; background: currentColor; box-shadow: 0 0 0.9em currentColor; flex: none; }
+  .hp-st-online { color: #4be08f; }
+  .hp-st-offline { color: #ff7b7b; }
+  .hp-st-local { color: #f3c14d; }
+  .hp-st-construction { color: #6bb6ff; }
+  .hp-f { display: flex; align-items: center; justify-content: space-between; gap: 0.7em; }
+  .hp-cta { flex: none; font-size: 0.74em; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; padding: 0.55em 1.05em; border-radius: 999px; background: linear-gradient(135deg, rgb(var(--hp-a)), rgb(var(--hp-b))); box-shadow: 0 0.6em 1.6em -0.5em rgb(var(--hp-b) / 0.9); }
+  .hp-host { font-size: 0.78em; letter-spacing: 0.04em; color: rgba(238, 242, 247, 0.62); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* light sweep + a light that follows the pointer (both sit above the picture, below the text) */
+  .orbit-card::before, .pj-card::before {
+    content: "";
+    position: absolute;
+    inset: -45%;
+    z-index: 4;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.3) 50%, transparent 58%);
+    transform: translateX(-70%);
+    opacity: 0;
+  }
+  .orbit-card:hover::before, .orbit-card:focus-visible::before,
+  .pj-card:hover::before, .pj-card:focus-visible::before { animation: hp-shine 1.25s var(--hp-ease) 0.05s both; }
+  @keyframes hp-shine {
+    0%   { transform: translateX(-70%); opacity: 0; }
+    15%  { opacity: 1; }
+    100% { transform: translateX(70%); opacity: 0; }
+  }
+  .orbit-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background: radial-gradient(150px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.2), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .orbit-card:hover::after { opacity: 1; }
+  .pj-card::after { z-index: 4; }
+
+  /* ---------- orbit cards: name only at rest, pop bigger on hover ---------- */
+  .orbit-card .pstatus { display: none; }            /* the status now lives in the hover details */
+  .orbit-card .hp { font-size: clamp(8px, calc(var(--card-w) / 18), 11px); --hp-lines: 2; gap: 0.4em; padding: 7% 8% 6%; }
+  .orbit-card .hp-t { -webkit-line-clamp: 1; }
+  .orbit-card {
+    transition: border-color 0.4s, box-shadow 0.7s, scale 0.8s var(--hp-pop), translate 0.8s var(--hp-pop);
+  }
+  .orbit-card img { transition: transform 1.4s var(--hp-ease), filter 0.7s ease; }
+  html[data-theme] .orbit-card:hover, html[data-theme] .orbit-card:focus-visible {
+    scale: 1.5;
+    translate: var(--hx, 0px) 0;                      /* nudged inward when the card sits at the edge of the orbit */
+    z-index: 60 !important;                           /* above its neighbours and the centre character */
+    opacity: 1 !important;
+    border-color: rgb(var(--hp-a) / 0.95);
+    box-shadow:
+      0 0 0 1px rgb(var(--hp-a) / 0.55),
+      0 36px 70px -18px rgba(0, 0, 0, 0.8),
+      0 0 70px -10px rgb(var(--hp-b) / 0.7);
+  }
+  .orbit-card:hover img, .orbit-card:focus-visible img { transform: scale(1.15); filter: blur(1.5px) brightness(0.6) saturate(1.2); }
+
+  /* ---------- gallery cards: name only at rest, pop bigger on hover ---------- */
+  .pj-card .pstatus, .pj-card .pj-host, .pj-card .pj-visit { display: none; }   /* shown in the hover details instead */
+  .pj-grid > li { position: relative; }
+  .pj-grid > li:hover, .pj-grid > li:focus-within { z-index: 6; }
+  .pj-card .hp { z-index: 1; font-size: 14px; --hp-lines: 4; padding: 1.4rem 1.4rem 1.3rem; }
+  .pj-card {
+    transition: transform 0.35s ease-out, translate 0.8s var(--hp-pop), scale 0.8s var(--hp-pop), border-color 0.4s, box-shadow 0.6s;
+  }
+  .pj-card:hover, .pj-card:focus-visible {
+    scale: 1.08;
+    box-shadow:
+      0 44px 80px -24px rgba(0, 0, 0, 0.8),
+      0 0 70px -12px rgb(var(--hp-b) / 0.65),
+      0 0 0 1px rgb(var(--hp-a) / 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  .pj-card:hover .pj-media img, .pj-card:focus-visible .pj-media img { transform: scale(1.16); filter: blur(1.5px) brightness(0.6) saturate(1.2); }
+  /* room around the grid so an enlarged card at the edge is not clipped by the scroll area */
+  .pj-scroll { padding: 1.7rem 1.4rem 3rem; margin: 0 -1.4rem; }
+}
+
+/* reduced motion: still shows the details on hover, but as a plain fade (no scaling, no flying text, no sweep) */
+@media (prefers-reduced-motion: reduce) {
+  .orbit-card, .pj-card { transition: border-color 0.2s, box-shadow 0.2s !important; }
+  html[data-theme] .orbit-card:hover, html[data-theme] .orbit-card:focus-visible, .pj-card:hover, .pj-card:focus-visible { scale: none; translate: none; }
+  .hp > * { transform: none !important; filter: none !important; transition: opacity 0.2s ease !important; }
+  .hp-bar { width: 3.6em !important; }
+  .orbit-card::before, .pj-card::before { display: none; }
+}
