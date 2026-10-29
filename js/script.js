@@ -472,7 +472,7 @@ fitTitle();
   (function frame(t) {
     const dt = Math.min(0.05, (t - last) / 1000);
     last = t;
-    if (items.length && visible && !paused) {
+    if (items.length && visible && !paused && !document.documentElement.classList.contains("pj-lock")) {
       // reduced-motion devices still get a gentler turn (full speed otherwise)
       angle += SPEED * (reduce ? 0.7 : 1) * dt;
       place();
@@ -615,7 +615,7 @@ fitTitle();
 
   // Play only while the section is on screen (muted, so autoplay is allowed)
   function sync() {
-    const want = visible && !document.hidden && !reduce;
+    const want = visible && !document.hidden && !reduce && !document.documentElement.classList.contains("pj-lock");
     if (!want) {
       if (!video.paused) video.pause();
     } else if (video.paused && !holding) {
@@ -690,6 +690,7 @@ fitTitle();
     if (!raf) raf = requestAnimationFrame(tick);
   });
   document.addEventListener("visibilitychange", sync);
+  document.addEventListener("gallery:toggle", sync); // the All Projects gallery opened or closed
   new IntersectionObserver(
     ([e]) => {
       visible = e.isIntersecting;
