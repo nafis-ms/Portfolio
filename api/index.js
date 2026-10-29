@@ -32,7 +32,7 @@ async function R(...cmd) {
 const clone = o => JSON.parse(JSON.stringify(o));
 
 const DEFAULTS = {
-  profile: {},     /* {about, phone, email, address, facebook, linkedin, whatsapp, discord, instagram}: empty = the page keeps its built-in text / hides the box */
+  profile: {},     /* {roles, about, phone, email, address, facebook, linkedin, whatsapp, discord, instagram}: empty = the page keeps its built-in text / hides the box */
   projects: [],    /* [{id, title, url, image, status}] status: online | offline | local | construction */
   skills: [],      /* [{id, name, logo, category, size, percent (0-100 or null), visible}] in display order */
   cv: null         /* {name, url} */
@@ -41,6 +41,15 @@ const PROJECT_STATUSES = ["online", "offline", "local", "construction"];
 const projStatus = v => PROJECT_STATUSES.includes(v) ? v : "online";   /* old projects without a status count as Online */
 const MAX_PROJECTS = 24, MAX_SKILLS = 40, MAX_FEEDBACK = 1000, SLIDER_MAX = 1000;
 
+/* hero rotating text: one role per line (a | also works), max 12 roles of 40 characters, no duplicates */
+const roleList = (v) => {
+  const seen = new Set(), out = [];
+  for (const r of (typeof v === "string" ? v : "").split(/[\n|]/)) {
+    const t = r.replace(/[\u0000-\u001F\u007F]/g, "").trim().slice(0, 40), k = t.toLowerCase();
+    if (t && !seen.has(k) && out.length < 12) { seen.add(k); out.push(t); }
+  }
+  return out.join("\n");
+};
 const S = (v, n) => typeof v === "string" ? v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim().slice(0, n) : "";
 const newId = () => Date.now().toString(36) + crypto.randomBytes(3).toString("hex");
 const EMAIL = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;
@@ -230,7 +239,7 @@ async function route(req, res, send) {
         const email = S(b.email, 120);
         if (email && !EMAIL.test(email)) throw new Error("That email address doesn't look right.");
         const c = await getContent();
-        c.profile = { about: S(b.about, 1200), phone: S(b.phone, 40), email, address: S(b.address, 160),
+        c.profile = { roles: roleList(b.roles), about: S(b.about, 1200), phone: S(b.phone, 40), email, address: S(b.address, 160),
                       facebook: optUrl(b.facebook, "Facebook"), linkedin: optUrl(b.linkedin, "LinkedIn"),
                       whatsapp: optUrl(b.whatsapp, "WhatsApp"), discord: optUrl(b.discord, "Discord"), instagram: optUrl(b.instagram, "Instagram") };
         await setContent(c); return send(200, c);
