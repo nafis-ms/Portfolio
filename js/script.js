@@ -450,7 +450,7 @@ fitTitle();
       if (window.PFMeta) {
         let host = "";
         try { host = url ? new URL(url).hostname.replace(/^www\./, "") : ""; } catch {}
-        PFMeta.attach(a, { title, url, status }, { status: PROJECT_STATUS[status], host });
+        PFMeta.attach(a, { title, url, status, image }, { status: PROJECT_STATUS[status], host });
       }
       holder.append(a);
       items.push(a);
@@ -490,7 +490,7 @@ fitTitle();
   (function frame(t) {
     const dt = Math.min(0.05, (t - last) / 1000);
     last = t;
-    if (items.length && visible && !paused && !document.documentElement.classList.contains("pj-lock")) {
+    if (items.length && visible && !paused && !document.documentElement.classList.contains("pj-lock") && !document.documentElement.classList.contains("pm-open")) {
       // reduced-motion devices still get a gentler turn (full speed otherwise)
       angle += SPEED * (reduce ? 0.7 : 1) * dt;
       place();
