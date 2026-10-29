@@ -1,6 +1,7 @@
 /* "All Projects" gallery: a glass capsule button in the Projects section opens a full-screen frosted-glass
  * layer that shows every project as a card. Data comes from store.js (PF.projects, saved in the admin panel).
- * No projects = the button stays hidden. Cards open the project in a new tab. */
+ * No projects = the button stays hidden. Cards show only the project name; the description and other details appear
+ * on hover (js/project-meta.js). Cards open the project in a new tab. */
 (function () {
   "use strict";
   var dock = document.getElementById("pjDock");
@@ -107,56 +108,11 @@
       a.append(media, num);
       if (p.url) a.append(visit);
       a.append(info);
+      // hover details (description, language, stars...): see js/project-meta.js + css/project-hover.css
+      if (window.PFMeta) PFMeta.attach(a, p, { status: STATUS_LABEL[p.status], host: p.url ? host(p.url) : "" });
       li.append(a);
       grid.append(li);
     });
-  }
-
-  /* ---------- GitHub descriptions ----------
-   * A project is matched to one of your repos by its link (github.com/you/repo, you.github.io/repo, or a repo whose
-   * "website" field is that link) and, failing that, by a title that equals the repo name. The repo's short
-   * description then shows under the title. No match, no description, or GitHub unreachable = nothing is added. */
-  function norm(t) { return String(t || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
-  function bare(u) { return String(u || "").toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/[\/#?].*$/, "") + (String(u || "").replace(/^https?:\/\/[^\/]+/i, "").replace(/[?#].*$/, "").replace(/\/+$/, "").toLowerCase()); }
-  function findRepo(p, repos) {
-    var byName = {};
-    repos.forEach(function (r) { byName[r.name.toLowerCase()] = r; });
-    if (p.url) {
-      try {
-        var u = new URL(p.url), parts = u.pathname.split("/").filter(Boolean), h = u.hostname.replace(/^www\./, "").toLowerCase();
-        if (h === "github.com" && parts[1] && byName[parts[1].toLowerCase()]) return byName[parts[1].toLowerCase()];
-        if (/\.github\.io$/.test(h)) {
-          var guess = parts[0] ? parts[0].toLowerCase() : h;
-          if (byName[guess]) return byName[guess];
-        }
-      } catch (e) { /* not a valid link */ }
-      var mine = bare(p.url);
-      for (var i = 0; i < repos.length; i++) if (repos[i].homepage && bare(repos[i].homepage) === mine) return repos[i];
-    }
-    var t = norm(p.title);
-    if (!t) return null;
-    for (var j = 0; j < repos.length; j++) if (norm(repos[j].name) === t) return repos[j];
-    return null;
-  }
-  var descFor = "";                                           // which list of projects the descriptions were added to
-  function addDescriptions() {
-    if (!window.GHRepos || descFor === builtKey) return;
-    var key = builtKey;
-    GHRepos.get().then(function (repos) {
-      if (key !== builtKey || !repos || !repos.length) return;
-      descFor = key;
-      items.forEach(function (p, i) {
-        var li = grid.children[i], info = li && li.querySelector(".pj-info");
-        if (!info || info.querySelector(".pj-desc")) return;
-        var r = findRepo(p, repos);
-        if (!r || !r.description) return;
-        var d = document.createElement("span");
-        d.className = "pj-desc";
-        d.textContent = r.description;                        // textContent: GitHub text can't inject HTML
-        d.title = r.description;
-        info.insertBefore(d, info.querySelector(".pstatus") ? info.querySelector(".pstatus").nextSibling : info.firstChild.nextSibling);
-      });
-    }).catch(function () { /* GitHub unreachable: the cards simply stay as they are */ });
   }
 
   /* ---------- open / close ---------- */
@@ -169,7 +125,6 @@
     lastFocus = document.activeElement;
     items = list();                                           // pick up anything that changed
     build();
-    addDescriptions();
     var r = openBtn.getBoundingClientRect();                  // the glass opens outward from the button
     modal.style.setProperty("--ox", (r.left + r.width / 2).toFixed(0) + "px");
     modal.style.setProperty("--oy", (r.top + r.height / 2).toFixed(0) + "px");
