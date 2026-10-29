@@ -33,7 +33,7 @@
     <script src="js/admin.js" defer></script>
     <script src="js/admin-skills.js" defer></script>
     <script src="js/admin-feedback.js" defer></script>
-    <script src="js/admin-profile.js?v=2" defer></script>
+    <script src="js/admin-profile.js?v=3" defer></script>
     <script src="js/admin-ui.js?v=2" defer></script>
   </head>
   <body>
@@ -418,10 +418,17 @@
           <section data-panel="profile" class="tab" hidden>
             <div class="tab-head">
               <h2>Profile</h2>
-              <p>The About paragraph and your contact details. Empty fields are
+              <p>The rotating hero text, the About paragraph and your contact details. Empty fields are
                 hidden on your site.</p>
             </div>
             <form id="profForm" class="panel narrow-panel" novalidate>
+              <h3>Hero rotating text</h3>
+              <label for="profRoles">Roles (one per line)</label>
+              <textarea id="profRoles" rows="6" maxlength="600"
+                placeholder="Leave empty to keep the default list&#10;Software Engineer&#10;Full Stack Developer"></textarea>
+              <p class="hint">These words type and delete one after another after
+                "Passionate" on the first screen. Up to 12 roles, 40 characters each.</p>
+
               <h3>About</h3>
               <label for="profAbout">About paragraph</label>
               <textarea id="profAbout" rows="7" maxlength="1200"
