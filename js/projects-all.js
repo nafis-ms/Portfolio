@@ -52,7 +52,11 @@
 
   /* ---------- build ---------- */
   function host(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return u; } }
+  var builtKey = "";
   function build() {
+    var key = JSON.stringify(items);
+    if (key === builtKey && grid.firstChild) return;          // same projects as last time: keep the cards (no rebuild, no image decoding)
+    builtKey = key;
     grid.textContent = "";
     items.forEach(function (p, i) {
       var li = document.createElement("li");
@@ -75,6 +79,7 @@
       img.alt = "";
       img.draggable = false;
       img.decoding = "async";
+      img.loading = "lazy";                                   // only the cards that scroll into view load their picture
       img.addEventListener("error", function () { a.classList.add("no-img"); });
       img.src = p.image;
       media.append(img);
@@ -123,6 +128,7 @@
     var bar = window.innerWidth - root.clientWidth;           // the scrollbar disappears while locked: pad so the page does not jump
     if (bar > 0) root.style.paddingRight = bar + "px";
     root.classList.add("pj-lock");
+    document.dispatchEvent(new Event("gallery:toggle"));      // the page behind pauses its animations
     modal.hidden = false;
     scroller.scrollTop = 0;
     void modal.offsetWidth;                                   // start from the closed iris, then animate
@@ -140,6 +146,7 @@
       modal.hidden = true;
       root.classList.remove("pj-lock");
       root.style.paddingRight = "";
+      document.dispatchEvent(new Event("gallery:toggle"));
     }, reduce ? 220 : 950);
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
   }
@@ -160,24 +167,38 @@
 
   /* ---------- pointer effects (mouse only): spotlight on the button, tilt + spotlight on the cards ---------- */
   if (fine && !reduce) {
+    var glass = openBtn.querySelector(".pj-glass"), bx = 0, by = 0, bq = false;
     openBtn.addEventListener("pointermove", function (e) {
-      var r = openBtn.getBoundingClientRect();
-      openBtn.querySelector(".pj-glass").style.setProperty("--mx", (e.clientX - r.left).toFixed(0) + "px");
-      openBtn.querySelector(".pj-glass").style.setProperty("--my", (e.clientY - r.top).toFixed(0) + "px");
+      bx = e.clientX; by = e.clientY;
+      if (bq) return;
+      bq = true;
+      requestAnimationFrame(function () {
+        bq = false;
+        var r = openBtn.getBoundingClientRect();
+        glass.style.setProperty("--mx", (bx - r.left).toFixed(0) + "px");
+        glass.style.setProperty("--my", (by - r.top).toFixed(0) + "px");
+      });
     });
     var TILT = 6;
+    var tc = null, tx = 0, ty = 0, tq = false;                // pointer events only note the position; the card is updated once per frame
+    function paintTilt() {
+      tq = false;
+      if (!tc) return;
+      var r = tc.getBoundingClientRect(), px = (tx - r.left) / r.width, py = (ty - r.top) / r.height;
+      tc.style.setProperty("--mx", (px * 100).toFixed(1) + "%");
+      tc.style.setProperty("--my", (py * 100).toFixed(1) + "%");
+      tc.style.setProperty("--ry", ((px - 0.5) * 2 * TILT).toFixed(2) + "deg");
+      tc.style.setProperty("--rx", ((0.5 - py) * 2 * TILT).toFixed(2) + "deg");
+    }
     grid.addEventListener("pointermove", function (e) {
       var c = e.target.closest(".pj-card");
       if (!c) return;
-      var r = c.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
-      c.style.setProperty("--mx", (px * 100).toFixed(1) + "%");
-      c.style.setProperty("--my", (py * 100).toFixed(1) + "%");
-      c.style.setProperty("--ry", ((px - 0.5) * 2 * TILT).toFixed(2) + "deg");
-      c.style.setProperty("--rx", ((0.5 - py) * 2 * TILT).toFixed(2) + "deg");
+      tc = c; tx = e.clientX; ty = e.clientY;
+      if (!tq) { tq = true; requestAnimationFrame(paintTilt); }
     });
     grid.addEventListener("pointerout", function (e) {
       var c = e.target.closest(".pj-card");
-      if (c && !c.contains(e.relatedTarget)) { c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg"); }
+      if (c && !c.contains(e.relatedTarget)) { if (tc === c) tc = null; c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg"); }
     });
   }
 })();
