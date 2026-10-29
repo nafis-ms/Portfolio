@@ -736,18 +736,14 @@ fitTitle();
 })();
 
 /* ---------- Hero: typewriter roles ---------- */
-// Types each word from data-words (see index.html), pauses, deletes it, then
-// moves on to the next one.
+// Types each word, pauses, deletes it, then moves on to the next one.
+// The words start from data-words (see index.html); profile.js replaces them with the
+// list saved in the admin panel by calling window.setRoles([...]).
 (function () {
   const line = $("typeLine");
   const word = $("typeWord");
   const cursor = $("typeCursor");
   if (!line || !word) return;
-  const words = (line.dataset.words || "")
-    .split("|")
-    .map((w) => w.trim())
-    .filter(Boolean);
-  if (!words.length) return;
 
   const TYPE = 85, // ms per typed letter
     DELETE = 45, // ms per deleted letter
@@ -760,22 +756,18 @@ fitTitle();
   sizer.className = "type-sizer";
   sizer.querySelector(".type-cursor").remove();
   sizer.querySelector(".type-word").removeAttribute("id");
-  sizer.querySelector(".type-word").textContent = words.reduce((a, b) => (b.length > a.length ? b : a));
+  const sizerWord = sizer.querySelector(".type-word");
   line.prepend(sizer);
 
   // Screen readers get the whole phrase once instead of every typed letter
   const lead = live.querySelector(".hero-lead");
   const sr = document.createElement("span");
   sr.className = "sr-only";
-  sr.textContent = (lead ? lead.textContent + " " : "") + words.join(", ");
   line.parentElement.append(sr);
 
-  if (words.length < 2) return;
-  let wi = 0,
-    count = words[0].length,
-    mode = "hold",
-    heroVisible = true;
   const busy = (on) => cursor && cursor.classList.toggle("busy", on);
+  let heroVisible = true,
+    gen = 0; // each start() bumps this, which stops the previous loop
 
   const hero = $("home");
   if (hero)
@@ -783,44 +775,70 @@ fitTitle();
       threshold: [0, 0.01], // the 0.01 step makes sure we are told when only an edge still touches the screen
     }).observe(hero);
 
-  // Reduced motion: no typing, just swap the word now and then
-  if (reduce) {
-    setInterval(() => {
-      if (document.hidden || !heroVisible) return;
-      wi = (wi + 1) % words.length;
-      word.textContent = words[wi];
-    }, 4000);
-    return;
-  }
+  function start(list) {
+    const words = (Array.isArray(list) ? list : [])
+      .map((w) => String(w).trim())
+      .filter(Boolean);
+    if (!words.length) return;
+    const my = ++gen;
 
-  function step() {
-    if (document.hidden || !heroVisible) return setTimeout(step, 400); // do nothing while nobody sees it
-    const w = words[wi];
-    if (mode === "hold") {
-      mode = "delete";
-      busy(true);
-      return setTimeout(step, DELETE);
-    }
-    if (mode === "delete") {
-      count--;
-      word.textContent = w.slice(0, count);
-      if (count > 0) return setTimeout(step, DELETE);
-      wi = (wi + 1) % words.length;
-      mode = "type";
-      busy(false);
-      return setTimeout(step, GAP);
-    }
-    // typing
-    busy(true);
-    count++;
-    word.textContent = words[wi].slice(0, count);
-    if (count < words[wi].length) return setTimeout(step, TYPE);
-    mode = "hold";
+    sizerWord.textContent = words.reduce((a, b) => (b.length > a.length ? b : a));
+    sr.textContent = (lead ? lead.textContent + " " : "") + words.join(", ");
+    word.textContent = words[0];
     busy(false);
+    if (words.length < 2) return;
+
+    let wi = 0,
+      count = words[0].length,
+      mode = "hold";
+
+    // Reduced motion: no typing, just swap the word now and then
+    if (reduce) {
+      (function swap() {
+        setTimeout(() => {
+          if (my !== gen) return;
+          if (!document.hidden && heroVisible) {
+            wi = (wi + 1) % words.length;
+            word.textContent = words[wi];
+          }
+          swap();
+        }, 4000);
+      })();
+      return;
+    }
+
+    function step() {
+      if (my !== gen) return; // a newer list took over
+      if (document.hidden || !heroVisible) return setTimeout(step, 400); // do nothing while nobody sees it
+      const w = words[wi];
+      if (mode === "hold") {
+        mode = "delete";
+        busy(true);
+        return setTimeout(step, DELETE);
+      }
+      if (mode === "delete") {
+        count--;
+        word.textContent = w.slice(0, count);
+        if (count > 0) return setTimeout(step, DELETE);
+        wi = (wi + 1) % words.length;
+        mode = "type";
+        busy(false);
+        return setTimeout(step, GAP);
+      }
+      // typing
+      busy(true);
+      count++;
+      word.textContent = words[wi].slice(0, count);
+      if (count < words[wi].length) return setTimeout(step, TYPE);
+      mode = "hold";
+      busy(false);
+      setTimeout(step, HOLD);
+    }
     setTimeout(step, HOLD);
   }
-  busy(false);
-  setTimeout(step, HOLD);
+
+  start((line.dataset.words || "").split("|"));
+  window.setRoles = start; // profile.js pushes the admin's list here
 })();
 
 /* ---------- Debug panel: open the site with ?debug=1 to see why an effect is off ---------- */
