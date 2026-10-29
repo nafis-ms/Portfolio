@@ -133,8 +133,8 @@ html[data-theme="light"] .contact::before {
   width: min(960px, 100%);
 }
 .info-box {
-  flex: 1 1 250px;
-  max-width: 310px;
+  flex: 0 1 auto;
+  max-width: 100%;
   display: flex;
   align-items: center;
   gap: 0.9rem;
@@ -167,8 +167,13 @@ html[data-theme="light"] .contact::before {
 .info-val {
   font-weight: 500;
   font-size: 1rem;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   color: var(--card-text);
+}
+/* keep the email on one line; it only breaks if the screen is truly too narrow */
+a.info-val[href^="mailto:"] { white-space: nowrap; }
+@media (max-width: 420px) {
+  a.info-val[href^="mailto:"] { white-space: normal; overflow-wrap: anywhere; }
 }
 a.info-val:hover { text-decoration: underline; text-underline-offset: 3px; }
 
