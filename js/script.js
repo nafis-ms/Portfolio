@@ -387,7 +387,7 @@ fitTitle();
       const a = angle + (i / n) * Math.PI * 2;
       const d = Math.sin(a); // -1 (back) .. 1 (front)
       const k = (d + 1) / 2;
-      el.style.transform = `translate(-50%, -50%) translate(${Math.cos(a) * rx}px, ${d * ry}px) scale(${0.7 + 0.3 * k})`;
+      el.style.transform = `translate(-50%, -50%) translate(${Math.cos(a) * rx}px, ${d * ry}px) scale(calc(${0.7 + 0.3 * k} * var(--hv, 1)))`; // --hv = hover pop (css/project-hover.css), kept inside this transform so the card grows around its own centre
       el.style.opacity = 0.45 + 0.55 * k;
       // back half sits behind the centre image (z 5), front half in front of it
       const z = d < 0 ? 1 + Math.round(k * 6) : 20 + Math.round(d * 10);
@@ -403,7 +403,7 @@ fitTitle();
       h = orbit.clientHeight;
     const cw = clamp(w * 0.2, 110, 200);
     orbit.style.setProperty("--card-w", cw + "px");
-    rx = Math.max(0, w / 2 - cw / 2 - 8);
+    rx = Math.max(0, w / 2 - cw / 2 - 8 - cw * 0.22); // spare room so a hovered (enlarged) card at the edge is not cut off
     ry = h * 0.3;
     if (items.length) place();
   }
@@ -462,28 +462,14 @@ fitTitle();
   }
 
   // Pause while hovering or focusing a card
-  const HOVER_SCALE = 1.5; // keep in sync with css/project-hover.css (.orbit-card:hover { scale })
-  function keepInView(c) {
-    // the hovered card grows from its centre: nudge it sideways so a card at the edge of the orbit is never cut off
-    const b = c.getBoundingClientRect(),
-      cs = section.getBoundingClientRect(),
-      half = (b.width * HOVER_SCALE) / 2,
-      cx = b.left + b.width / 2,
-      min = Math.max(0, cs.left) + 10,
-      max = Math.min(innerWidth, cs.right) - 10;
-    let dx = 0;
-    if (cx - half < min) dx = min - (cx - half);
-    else if (cx + half > max) dx = max - (cx + half);
-    c.style.setProperty("--hx", Math.round(dx) + "px");
-  }
   holder.addEventListener("pointerover", (e) => {
-    const c = e.target.closest(".orbit-card");
-    if (!c) return;
-    paused = true;
-    if (e.relatedTarget && c.contains(e.relatedTarget)) return; // moving inside the same card: it is already enlarged
-    keepInView(c);
+    if (e.target.closest(".orbit-card")) paused = true;
   });
-  holder.addEventListener("pointerout", () => (paused = false));
+  holder.addEventListener("pointerout", (e) => {
+    // moving between parts of the same card must not un-pause the orbit (the card would drift away from the pointer)
+    if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".orbit-card") === e.target.closest(".orbit-card")) return;
+    paused = false;
+  });
   // light that follows the pointer across the hovered card (read by css/project-hover.css)
   holder.addEventListener("pointermove", (e) => {
     const c = e.target.closest(".orbit-card");
@@ -492,11 +478,7 @@ fitTitle();
     c.style.setProperty("--mx", (((e.clientX - r.left) / r.width) * 100).toFixed(1) + "%");
     c.style.setProperty("--my", (((e.clientY - r.top) / r.height) * 100).toFixed(1) + "%");
   });
-  holder.addEventListener("focusin", (e) => {
-    paused = true;
-    const c = e.target.closest(".orbit-card");
-    if (c) keepInView(c);
-  });
+  holder.addEventListener("focusin", () => (paused = true));
   holder.addEventListener("focusout", () => (paused = false));
 
   new IntersectionObserver(([e]) => (visible = e.isIntersecting), {
