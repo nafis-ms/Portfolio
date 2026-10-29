@@ -23,6 +23,10 @@ html[data-theme="light"] .orbit-card {
   --hp-b: var(--pj-b);
 }
 
+/* hover pop factor for the orbit cards. It is read inside the card's own transform (js/script.js place()), so the card
+   grows around its own centre and never drifts. A registered number lets the browser animate it smoothly. */
+@property --hv { syntax: "<number>"; inherits: false; initial-value: 1; }
+
 .hp { display: none; }
 
 @media (hover: hover) and (pointer: fine) {
@@ -136,12 +140,11 @@ html[data-theme="light"] .orbit-card {
   .orbit-card .hp { font-size: clamp(8px, calc(var(--card-w) / 18), 11px); --hp-lines: 2; gap: 0.4em; padding: 7% 8% 6%; }
   .orbit-card .hp-t { -webkit-line-clamp: 1; }
   .orbit-card {
-    transition: border-color 0.4s, box-shadow 0.7s, scale 0.8s var(--hp-pop), translate 0.8s var(--hp-pop);
+    transition: border-color 0.4s, box-shadow 0.7s, --hv 0.8s var(--hp-pop);
   }
   .orbit-card img { transition: transform 1.4s var(--hp-ease), filter 0.7s ease; }
   html[data-theme] .orbit-card:hover, html[data-theme] .orbit-card:focus-visible {
-    scale: 1.5;
-    translate: var(--hx, 0px) 0;                      /* nudged inward when the card sits at the edge of the orbit */
+    --hv: 1.4;                                        /* grows around its own centre: the card stays exactly where it is */
     z-index: 60 !important;                           /* above its neighbours and the centre character */
     opacity: 1 !important;
     border-color: rgb(var(--hp-a) / 0.95);
@@ -162,6 +165,7 @@ html[data-theme="light"] .orbit-card {
   }
   .pj-card:hover, .pj-card:focus-visible {
     scale: 1.08;
+    translate: none;                                  /* no lift: the card grows in place */
     box-shadow:
       0 44px 80px -24px rgba(0, 0, 0, 0.8),
       0 0 70px -12px rgb(var(--hp-b) / 0.65),
@@ -176,7 +180,8 @@ html[data-theme="light"] .orbit-card {
 /* reduced motion: still shows the details on hover, but as a plain fade (no scaling, no flying text, no sweep) */
 @media (prefers-reduced-motion: reduce) {
   .orbit-card, .pj-card { transition: border-color 0.2s, box-shadow 0.2s !important; }
-  html[data-theme] .orbit-card:hover, html[data-theme] .orbit-card:focus-visible, .pj-card:hover, .pj-card:focus-visible { scale: none; translate: none; }
+  html[data-theme] .orbit-card:hover, html[data-theme] .orbit-card:focus-visible { --hv: 1; }
+  .pj-card:hover, .pj-card:focus-visible { scale: none; }
   .hp > * { transform: none !important; filter: none !important; transition: opacity 0.2s ease !important; }
   .hp-bar { width: 3.6em !important; }
   .orbit-card::before, .pj-card::before { display: none; }
