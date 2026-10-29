@@ -1,4 +1,4 @@
-/* Public site: fills the About paragraph, the contact boxes and the social links
+/* Public site: fills the hero rotating text, the About paragraph, the contact boxes and the social links
  * from the admin panel's Profile tab (store.js, saved on the server). */
 (function () {
   "use strict";
@@ -20,6 +20,10 @@
     // About paragraph (empty = keep the default text already in the page)
     var about = str(p.about, 1200);
     if (about && window.setAbout) window.setAbout(about);
+
+    // Hero rotating text: one role per line (empty = keep the default list in index.html)
+    var roles = str(p.roles, 600).split(/[\n|]/).map(function (r) { return r.trim(); }).filter(Boolean);
+    if (roles.length && window.setRoles) window.setRoles(roles);
 
     // Contact boxes
     var email = str(p.email, 120);
