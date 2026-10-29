@@ -225,7 +225,7 @@
     var last = performance.now(), t = 0, span;
     (function frame(now) {
       requestAnimationFrame(frame);
-      if (document.hidden) { last = now; return; }
+      if (document.hidden || root.classList.contains("pj-lock")) { last = now; return; }   // nothing moves behind the open gallery
       if (now - last < 30) return;                       // ~30 fps is plenty for slow dust and halves the work
       var dt = Math.min(0.05, (now - last) / 1000 || 0);
       last = now; t += dt;
@@ -360,7 +360,7 @@
       requestAnimationFrame(frame);
       var dt = Math.min(0.05, (now - last) / 1000 || 0);
       last = now;
-      if (document.hidden) return;
+      if (document.hidden || root.classList.contains("pj-lock")) return;
       var lightOn = isLight();
       if (!lightOn && fade <= 0.002) { enter = 0; fade = 0; return; }   // Dark Mode: nothing to draw
       if (reduce) {                                                   // reduced motion: one still, soft frame
