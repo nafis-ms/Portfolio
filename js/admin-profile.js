@@ -7,7 +7,7 @@
   if (!window.ADMIN) return;
 
   var PROFILE = {
-    about: "#profAbout", phone: "#profPhone", email: "#profEmail", address: "#profAddress"
+    roles: "#profRoles", about: "#profAbout", phone: "#profPhone", email: "#profEmail", address: "#profAddress"
   };
   var SOCIAL = {
     facebook: "#profFacebook", linkedin: "#profLinkedin", whatsapp: "#profWhatsapp",
