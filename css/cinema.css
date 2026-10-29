@@ -171,7 +171,7 @@ html[data-theme="light"] .contact::before {
 }
 /* keep the email on one line; it only breaks if the screen is truly too narrow */
 a.info-val[href^="mailto:"] { white-space: nowrap; }
-@media (max-width: 420px) {
+@media (max-width: 340px) {
   a.info-val[href^="mailto:"] { white-space: normal; overflow-wrap: anywhere; }
 }
 a.info-val:hover { text-decoration: underline; text-underline-offset: 3px; }
@@ -264,7 +264,10 @@ a.info-val:hover { text-decoration: underline; text-underline-offset: 3px; }
 .contact-btn:hover::after { transform: translateX(120%); transition: transform 0.8s var(--cine-ease); }
 
 @media (max-width: 640px) {
-  .info-box { max-width: 100%; }
+  /* phones: three equal, full-width boxes in a column; the text shrinks a little so the email stays on one line */
+  .info-grid { flex-direction: column; align-items: stretch; width: min(420px, 100%); gap: 0.75rem; }
+  .info-box { flex: none; width: 100%; max-width: 100%; gap: 0.75rem; padding-left: 0.9rem; padding-right: 0.9rem; }
+  .info-val { font-size: clamp(0.72rem, 3.4vw, 1rem); }
   .section-title.fade { letter-spacing: 0.03em; }
   .cine-grain { display: none; }
 }
