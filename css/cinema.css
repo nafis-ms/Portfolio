@@ -1657,6 +1657,7 @@ html[data-theme="light"] .pj-card::after { background: radial-gradient(260px cir
 .pj-card:hover .pj-visit, .pj-card:focus-visible .pj-visit { opacity: 1; transform: none; }
 .pj-info { display: flex; flex-direction: column; gap: 0.3rem; padding: 1rem 1.1rem 1.15rem; min-width: 0; }
 .pj-t { font-size: 1.12rem; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
+.pj-desc { font-size: 0.86rem; line-height: 1.45; color: var(--pj-text); opacity: 0.82; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0.1rem 0 0.2rem; }
 .pj-host { font-size: 0.8rem; letter-spacing: 0.04em; color: var(--pj-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pj-info::before { content: ""; width: 34px; height: 2px; margin-bottom: 0.45rem; border-radius: 2px; background: linear-gradient(90deg, rgb(var(--pj-a)), rgb(var(--pj-b))); transition: width 0.7s var(--cine-ease); }
 .pj-card:hover .pj-info::before { width: 64px; }
