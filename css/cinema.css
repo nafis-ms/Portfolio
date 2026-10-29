@@ -41,8 +41,7 @@ html[data-theme="light"] {
   inset: 0;
   z-index: 8000;
   pointer-events: none;
-  opacity: 0.07;
-  mix-blend-mode: overlay;
+  opacity: 0.02;                    /* was 0.07 with mix-blend-mode: overlay, which re-blended the whole screen every frame */
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 .cine-grain::after {
@@ -51,7 +50,7 @@ html[data-theme="light"] {
   inset: 0;
   opacity: 0;
 }
-html[data-theme="light"] .cine-grain { opacity: 0.035; mix-blend-mode: multiply; }
+html[data-theme="light"] .cine-grain { display: none; }      /* white noise multiplied onto a light page changes nothing, so skip it */
 
 /* ===== Cinematic reveal: blur + scale + long ease (replaces the plain fade) ===== */
 .fade {
@@ -323,7 +322,6 @@ html[data-theme="light"] .cine-vignette {
   height: 100%;
   z-index: 7000;
   pointer-events: none;
-  mix-blend-mode: screen;
 }
 html[data-theme="light"] .cine-dust { mix-blend-mode: normal; opacity: 0.7; }
 
@@ -961,8 +959,6 @@ html[data-theme="light"] .sk-backdrop {
     0 60px 120px -30px rgba(0, 0, 0, 0.85),
     0 0 100px -24px rgb(var(--sk-b) / 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  -webkit-backdrop-filter: blur(26px) saturate(1.4);
-  backdrop-filter: blur(26px) saturate(1.4);
   overflow: hidden;
   outline: none;
   opacity: 0;
@@ -1264,6 +1260,9 @@ html[data-theme="light"] .pj-dock, html[data-theme="light"] .pj-modal {
 @property --pj-ang { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
 @keyframes pj-spin { to { --pj-ang: 360deg; } }
 html.pj-lock { overflow: hidden; }
+/* While the gallery is open, everything behind it stands still (its CSS animations pause; js pauses the rest).
+   The glass then blurs a still picture instead of a moving one. */
+html.pj-lock :not(.pj-modal):not(.pj-modal *) { animation-play-state: paused !important; }
 
 /* ---------- the capsule ---------- */
 .pj-dock {
@@ -1442,16 +1441,16 @@ html.cine-fx .projects.cine-seen .pj-btn { animation: pj-reveal 1.6s var(--cine-
     radial-gradient(ellipse at 18% 8%, rgb(var(--pj-a) / 0.14), transparent 55%),
     radial-gradient(ellipse at 85% 92%, rgb(var(--pj-b) / 0.12), transparent 55%),
     rgba(8, 7, 16, 0.14);                /* mostly transparent tint: the page shows through the glass */
-  -webkit-backdrop-filter: blur(40px) saturate(1.5);
-  backdrop-filter: blur(40px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
 }
 html[data-theme="light"] .pj-backdrop {
   background:
     radial-gradient(ellipse at 18% 8%, rgb(var(--pj-a) / 0.16), transparent 55%),
     radial-gradient(ellipse at 85% 92%, rgb(var(--pj-c) / 0.1), transparent 55%),
     rgba(240, 246, 255, 0.18);
-  -webkit-backdrop-filter: blur(40px) saturate(1.6);
-  backdrop-filter: blur(40px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  backdrop-filter: blur(24px) saturate(1.6);
 }
 .pj-modal.is-open .pj-backdrop { clip-path: circle(160vmax at var(--ox) var(--oy)); transition-duration: 1.35s; }
 .pj-backdrop::after {                   /* thin glass edge light around the whole screen */
@@ -1584,10 +1583,8 @@ html[data-theme="light"] .pj-title { background-image: linear-gradient(180deg, #
   border-radius: 22px;
   overflow: hidden;
   color: var(--pj-text);
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.03));
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
   border: 1px solid var(--pj-glass-line);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  backdrop-filter: blur(14px) saturate(1.4);
   box-shadow: 0 26px 50px -28px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transition: transform 0.35s ease-out, translate 0.6s var(--cine-ease), border-color 0.4s, box-shadow 0.5s;
@@ -1630,10 +1627,8 @@ html[data-theme="light"] .pj-card::after { background: radial-gradient(260px cir
   font-weight: 500;
   letter-spacing: 0.18em;
   color: #fff;
-  background: rgba(10, 10, 20, 0.45);
+  background: rgba(10, 10, 20, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 .pj-visit {
   position: absolute;
@@ -1670,7 +1665,7 @@ html[data-theme="light"] .pj-card::after { background: radial-gradient(260px cir
 .pj-modal.is-open .pj-card    { animation: pj-card 1.3s var(--cine-ease) calc(0.9s + var(--i, 0) * 0.085s) backwards; }
 @keyframes pj-up    { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } to { opacity: 1; transform: none; filter: blur(0); } }
 @keyframes pj-title { from { opacity: 0; letter-spacing: 0.22em; transform: translateY(24px); filter: blur(16px); } to { opacity: 1; letter-spacing: -0.025em; transform: none; filter: blur(0); } }
-@keyframes pj-card  { from { opacity: 0; transform: translateY(80px) rotateX(18deg) scale(0.9); filter: blur(12px); } to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes pj-card  { from { opacity: 0; transform: translateY(80px) rotateX(18deg) scale(0.9); } to { opacity: 1; transform: none; } }
 
 /* calm mode: "reduce motion" visitors get the gallery as a plain fade */
 .pj-modal.pj-calm, .pj-modal.pj-calm.is-open { clip-path: none; transition: opacity 0.2s; }
