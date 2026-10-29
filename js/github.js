@@ -55,6 +55,35 @@
     return e;
   }
 
+  /* ---------- repo list (shared with the All Projects gallery as window.GHRepos) ---------- */
+  var REPO_KEY = "portfolio-ghrepos-" + user.toLowerCase();
+  function slimRepo(r) {
+    return { name: String(r.name || ""), description: String(r.description || ""), html_url: String(r.html_url || ""),
+             homepage: String(r.homepage || ""), fork: !!r.fork, stargazers_count: r.stargazers_count || 0, language: r.language || null };
+  }
+  function readRepoCache() {
+    try { var c = JSON.parse(localStorage.getItem(REPO_KEY)); return c && Array.isArray(c.data) ? c : null; } catch (e) { return null; }
+  }
+  var repoPromise = null;
+  function getRepos() {
+    var c = readRepoCache();
+    if (c && Date.now() - c.t < TTL) return Promise.resolve(c.data);
+    if (repoPromise) return repoPromise;                       // one request even if two parts of the page ask at once
+    repoPromise = getJSON(API + "/users/" + encodeURIComponent(user) + "/repos?per_page=100&type=owner&sort=pushed").then(function (list) {
+      var slim = (Array.isArray(list) ? list : []).filter(Boolean).map(slimRepo);
+      try { localStorage.setItem(REPO_KEY, JSON.stringify({ t: Date.now(), data: slim })); } catch (e) { /* storage full or blocked */ }
+      repoPromise = null;
+      return slim;
+    }, function (err) {
+      repoPromise = null;
+      var old = readRepoCache();                               // GitHub unreachable or rate limited: use the last saved list
+      if (old) return old.data;
+      throw err;
+    });
+    return repoPromise;
+  }
+  window.GHRepos = { get: getRepos };
+
   /* ---------- data ---------- */
   var LANG_COLORS = {
     JavaScript: "#f1e05a", TypeScript: "#3178c6", Python: "#3572A5", "C++": "#f34b7d", C: "#9aa0a6",
@@ -113,7 +142,7 @@
   function loadFresh() {
     return Promise.all([
       getJSON(API + "/users/" + encodeURIComponent(user)),
-      getJSON(API + "/users/" + encodeURIComponent(user) + "/repos?per_page=100&type=owner&sort=pushed").catch(function () { return null; }),
+      getRepos().catch(function () { return null; }),
       getJSON(CONTRIB_API + encodeURIComponent(user) + "?y=last").then(fromContribApi).catch(function () {
         return getJSON(API + "/users/" + encodeURIComponent(user) + "/events/public?per_page=100").then(fromEvents).catch(function () { return null; });
       })
